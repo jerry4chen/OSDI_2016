@@ -16,7 +16,7 @@ You can leverage `grep` to find out where to fill up to finish this lab.
 
 To run this kernel
 
-    $ make
+    $ make all
     $ qemu -hda kernel.img -monitor stdio
 
 - Modify `boot/boot.S` to setup GDT

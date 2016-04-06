@@ -60,13 +60,28 @@ gdt:
 #       easy-to-use macro when defining segmentation type.
 
 	SEG_NULL    # NULL segment
-	SEG()     # Kernel code segment
-	SEG()     # Kernel data segment
+	SEG(STA_X, 0x0, 0xffffffff)     # Kernel code segment
+	SEG(STA_W, 0x0, 0xffffffff)     # Kernel data segment
+
 
 # TODO: Please fillup the GDT register for gdt in order to used
 #       with "lgdt" instruction.
 # Note: You can reference lab3_reference page 13 for detail meaning
 #       of each bit of GDT register.
 gdtdesc: 
-	.word	# gdt limit
-	.word	# gdt base
+	.word 256*8-1	# gdt limit
+	.long gdt	# gdt base
+
+	# refer the linux-0.11
+        #.word 256*8-1           # so does gdt (not that that's any
+        #.long gdt               # magic number, but it works for me :^)
+
+        #.align 8
+#idt:    .fill 256,8,0           # idt is uninitialized
+
+#gdt:    .quad 0x0000000000000000        /* NULL descriptor */
+#        .quad 0x00c09a0000000fff        /* 16Mb */
+#        .quad 0x00c0920000000fff        /* 16Mb */
+#        .quad 0x0000000000000000        /* TEMPORARY - don't use */
+#        .fill 252,8,0                   /* space for LDT's and TSS's etc */
+

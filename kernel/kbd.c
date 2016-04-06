@@ -216,6 +216,9 @@ kbd_intr(void)
 	cons_intr(kbd_proc_data);
 }
 
+/*
+ *  0456069visited 
+ */
 void kbd_init(void)
 {
 	// Drain the kbd buffer so that Bochs generates interrupts.
