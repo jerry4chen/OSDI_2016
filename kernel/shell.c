@@ -66,7 +66,7 @@ int chgcolor(int argc, char **argv)
 	
 	}
 	else{ 
-//	cprintf("chgcolor argument error\n");
+	cprintf("chgcolor argument error\n");
 }
 }
 
