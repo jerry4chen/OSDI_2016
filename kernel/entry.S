@@ -6,11 +6,16 @@
 .globl _start
 .global entry
 _start = RELOC(entry)
+movl $(RELOC(BSS)), %edi
+movl $(RELOC(end)), %ecx
+subl %edi,%ecx
+xorl %eax,%eax
+cld
+rep stosb
 
 .text
 entry:
 	movw	$0x1234,0x472			# warm boot
-
 	# We haven't set up virtual memory yet, so we're running from
 	# the physical address the boot loader loaded the kernel at: 1MB
 	# (plus a few bytes).  However, the C code is linked to run at
