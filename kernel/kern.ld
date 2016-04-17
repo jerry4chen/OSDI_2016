@@ -41,12 +41,16 @@ SECTIONS
 	/* Adjust the address for the data segment to the next page */
 	. = ALIGN(0x1000);
 
+
+	  PROVIDE(DATASEG = .);	
 	/* The data segment */
 	.data : {
-		*(.data)
+		*(.data);
+		
 	}
+	PROVIDE(BSS = .);
 	.bss : {
-		*(.bss)
+		*(.bss);
 	}
 	PROVIDE(end = .);
 

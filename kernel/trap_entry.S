@@ -23,6 +23,10 @@
  *       when declaring interface for ISRs.
  */
 
+TRAPHANDLER_NOEC(irq0_entry,IRQ_OFFSET+IRQ_TIMER);
+TRAPHANDLER_NOEC(irq1_entry,IRQ_OFFSET+IRQ_KBD);
+
+
 .globl default_trap_handler;
 _alltraps:
   /* TODO: Since we are going to call default_trap_handler, we have to prepare
@@ -36,10 +40,22 @@ _alltraps:
    *       You may want to leverage the "pusha" instructions to reduce your work of
    *       pushing all the general purpose registers into the stack.
 	 */
+	
+	pushl %ds
+    	pushl %es
+    	pusha
+    	pushl %esp
+    	call default_trap_handler
+    	popl %esp
+    	popa
+    	popl %es
+    	popl %ds
+    	add  $8, %esp
+   	iret
+	
+	#pushl %esp # Pass a pointer which points to the Trapframe as an argument to default_trap_handler()
+	#call default_trap_handler
 
-	pushl %esp # Pass a pointer which points to the Trapframe as an argument to default_trap_handler()
-	call default_trap_handler
-
-	add $8, %esp # Cleans up the pushed error code and pushed ISR number
-	iret # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
+	#add $8, %esp # Cleans up the pushed error code and pushed ISR number
+	#iret # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
 

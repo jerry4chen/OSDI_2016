@@ -1,6 +1,11 @@
-#include <kernel/trap.h>
 #include <inc/mmu.h>
 #include <inc/x86.h>
+
+#include<inc/kbd.h>
+#include<inc/timer.h>
+#include<inc/stdio.h>
+#include<kernel/trap.h>
+#include<inc/shell.h>
 
 /* For debugging, so print_trapframe can distinguish between printing
  * a saved trapframe and printing the current trapframe and print some
@@ -15,7 +20,22 @@ static struct Trapframe *last_tf;
  *       Interrupt descriptor table must be built at run time because shifted
  *       function addresses can't be represented in relocation records.
  */
+struct Gatedesc idt[256] = {{0}};
+struct Pseudodesc idt_pd = {
+    sizeof(idt) - 1, (uint32_t) idt    
+};
 
+/*
+struct Gatedesc  idt[256] = {{0}};
+struct Psuedodesc idt_pd = {sizeof(idt)-1, (uint32_t) idt};
+
+*/
+//
+// Psuedodesc : 
+//struct Pseudodesc {
+//         uint16_t pd_lim;                // Limit
+//         uint32_t pd_base;               // Base address
+//} __attribute__ ((packed));		// NO alignment 
 
 /* For debugging */
 static const char *trapname(int trapno)
@@ -96,13 +116,30 @@ print_regs(struct PushRegs *regs)
 	cprintf("  oesp 0x%08x\n", regs->reg_oesp);
 	cprintf("  ebx  0x%08x\n", regs->reg_ebx);
 	cprintf("  edx  0x%08x\n", regs->reg_edx);
-	cprintf("  ecx  0x%08x\n", regs->reg_ecx);
+	cprintf("  ecx  0x%08x\n", regs->reg_ecx);	
 	cprintf("  eax  0x%08x\n", regs->reg_eax);
 }
 
 static void
 trap_dispatch(struct Trapframe *tf)
 {
+	switch(tf->tf_trapno){
+	case IRQ_OFFSET+IRQ_KBD :
+		//shell();
+	//	cprintf("IRQ_KBD\n");	
+		kbd_intr();
+		//shell();	
+		break;
+	case IRQ_OFFSET+IRQ_TIMER:
+		//shell();
+	//	cprintf("IRQ_TIMER\n");
+		timer_handler();
+		break;
+
+	default:
+		print_trapframe(tf);
+	//	cprintf("0456069's trap_dispatch\n");
+	}	
   /* TODO: Handle specific interrupts.
    *       You need to check the interrupt number in order to tell
    *       which interrupt is currently happening since every interrupt
@@ -119,7 +156,7 @@ trap_dispatch(struct Trapframe *tf)
    */
 
 	// Unexpected trap: The user process or the kernel has a bug.
-	print_trapframe(tf);
+//	print_trapframe(tf);
 }
 
 /* 
@@ -138,6 +175,10 @@ void default_trap_handler(struct Trapframe *tf)
 
 void trap_init()
 {
+
+	extern void irq0_entry();
+	extern void irq1_entry();
+
   /* TODO: You should initialize the interrupt descriptor table.
    *       You should setup at least keyboard interrupt and timer interrupt as
    *       the lab's requirement.
@@ -159,9 +200,14 @@ void trap_init()
    *       There is a data structure called Pseudodesc in mmu.h which might
    *       come in handy for you when filling up the argument of "lidt"
    */
-
+	//SETGATE(gate, istrap, sel, off, dpl)   
+	
 	/* Keyboard interrupt setup */
+	SETGATE(idt[IRQ_OFFSET+IRQ_KBD],0,GD_KT,irq1_entry,0);
 	/* Timer Trap setup */
+	SETGATE(idt[IRQ_OFFSET+IRQ_TIMER],0,GD_KT,irq0_entry,0);
   /* Load IDT */
-
+	lidt(&idt_pd);
+//	asm volatile("lidt idt_pd");
+	//lgdt();
 }

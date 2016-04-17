@@ -3,6 +3,9 @@
 #include <inc/shell.h>
 #include <inc/timer.h>
 
+
+extern void settextcolor(unsigned char forecolor, unsigned char backcolor);
+
 struct Command {
 	const char *name;
 	const char *desc;
@@ -13,7 +16,9 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
-	{ "print_tick", "Display system tick", print_tick }
+	{ "print_tick", "Display system tick", print_tick },
+	{ "chgcolor", "Change the display's color",chgcolor}
+	
 };
 #define NCOMMANDS (sizeof(commands)/sizeof(commands[0]))
 
@@ -21,7 +26,6 @@ static struct Command commands[] = {
 int mon_help(int argc, char **argv)
 {
 	int i;
-
 	for (i = 0; i < NCOMMANDS; i++)
 		cprintf("%s - %s\n", commands[i].name, commands[i].desc);
 	return 0;
@@ -29,17 +33,42 @@ int mon_help(int argc, char **argv)
 
 int mon_kerninfo(int argc, char **argv)
 {
+
+
 	/* TODO: Print the kernel code and data section size 
    * NOTE: You can count only linker script (kernel/kern.ld) to
    *       provide you with those information.
    *       Use PROVIDE inside linker script and calculate the
    *       offset.
    */
+	extern char kernel_load_addr[], _start[], end[], etext[], __STABSTR_END__[], __STABSTR_BEGIN__[], __STAB_END__[], __STAB_BEGIN__[], BSS[], DATASEG[];  
+  
+	cprintf("Kernel Code base start = %0x size = %d\n", kernel_load_addr, etext - kernel_load_addr);  
+    	cprintf("Kernel Data base start = %0x size = %d\n", DATASEG, end- DATASEG);
+	cprintf("kernel exe memory footprint: %dKB\n",(end - kernel_load_addr)/1024);
+	cprintf("Kernel_load_addr : %0x\n",_start);
 	return 0;
 }
 int print_tick(int argc, char **argv)
 {
 	cprintf("Now tick = %d\n", get_tick());
+}
+
+int chgcolor(int argc, char **argv)
+{
+	if(argc == 2) {
+	
+	unsigned char input = *argv[1]-'0';
+
+	//ex: chgcolor f -> Change color 54!\n
+	if(input==0){settextcolor((unsigned char)input,255);}
+	else{	settextcolor((unsigned char)input,16);}
+	cprintf("Change color %d! \n",input);
+	
+	}
+	else{ 
+	cprintf("chgcolor argument error\n");
+}
 }
 
 #define WHITESPACE "\t\r\n "
