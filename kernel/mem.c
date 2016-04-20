@@ -196,7 +196,7 @@ mem_init(void)
 		KSTKSIZE,
 		PADDR(bootstack),
 		PTE_W|PTE_P);
-	cprintf("PADDR(bootstack) %x\n",PADDR(bootstack));
+//	cprintf("PADDR(bootstack) %x\n",PADDR(bootstack));
 
 	//////////////////////////////////////////////////////////////////////
 	// Map all of physical memory at KERNBASE.
@@ -218,8 +218,8 @@ mem_init(void)
 	
 	//////////////////////////////////////////////////////////////////////
 	// Map VA range [0, EXTPHYSMEM) to PA range [0, EXTPHYSMEM)
-    boot_map_region(kern_pgdir, 0, ROUNDUP(EXTPHYSMEM, PGSIZE), 0, (PTE_W) | (PTE_P));
-	// OMG^^^^^^
+	boot_map_region(kern_pgdir, 0, ROUNDUP(EXTPHYSMEM, PGSIZE), 0, (PTE_W) | (PTE_P));
+	
 	// Check that the initial page directory has been set up correctly.
 	check_kern_pgdir();
 

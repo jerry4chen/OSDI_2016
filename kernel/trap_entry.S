@@ -25,6 +25,7 @@
 
 TRAPHANDLER_NOEC(irq0_entry,IRQ_OFFSET+IRQ_TIMER);
 TRAPHANDLER_NOEC(irq1_entry,IRQ_OFFSET+IRQ_KBD);
+TRAPHANDLER_NOEC(page_fault_entry,T_PGFLT);
 
 
 .globl default_trap_handler;

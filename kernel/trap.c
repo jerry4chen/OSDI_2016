@@ -120,6 +120,15 @@ print_regs(struct PushRegs *regs)
 	cprintf("  eax  0x%08x\n", regs->reg_eax);
 }
 
+
+void page_fault_handler(struct Trapframe * tf){
+
+	uint32_t fault_va ;
+	fault_va = rcr2();
+	cprintf("[0456069] Page fault @%08x\n",fault_va);
+	while(1);
+}
+
 static void
 trap_dispatch(struct Trapframe *tf)
 {
@@ -135,7 +144,9 @@ trap_dispatch(struct Trapframe *tf)
 	//	cprintf("IRQ_TIMER\n");
 		timer_handler();
 		break;
-
+	case T_PGFLT:
+		page_fault_handler(tf);
+		break;
 	default:
 		print_trapframe(tf);
 	//	cprintf("0456069's trap_dispatch\n");
@@ -178,7 +189,7 @@ void trap_init()
 
 	extern void irq0_entry();
 	extern void irq1_entry();
-
+	extern void page_fault_entry();
   /* TODO: You should initialize the interrupt descriptor table.
    *       You should setup at least keyboard interrupt and timer interrupt as
    *       the lab's requirement.
@@ -201,7 +212,8 @@ void trap_init()
    *       come in handy for you when filling up the argument of "lidt"
    */
 	//SETGATE(gate, istrap, sel, off, dpl)   
-	
+
+	SETGATE(idt[T_PGFLT],0,GD_KT,page_fault_entry,0);	
 	/* Keyboard interrupt setup */
 	SETGATE(idt[IRQ_OFFSET+IRQ_KBD],0,GD_KT,irq1_entry,0);
 	/* Timer Trap setup */
