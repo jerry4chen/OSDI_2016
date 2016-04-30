@@ -2,6 +2,7 @@
 #include <inc/types.h>
 #include <inc/string.h>
 #include <inc/x86.h>
+#include <inc/error.h>
 #include <inc/memlayout.h>
 #include <kernel/task.h>
 #include <kernel/mem.h>
@@ -100,13 +101,39 @@ int task_create()
 	Task *ts = NULL;
 
 	/* Find a free task structure */
+	
+	int i =0;
+	for (i =0; i< NR_TASKS; i++)
+	{
+		if (tasks[i].state == TASK_FREE || tasks[i].state == TASK_STOP)
+		{
+			ts = &(tasks[i]);
+			break;
+		}		
+	}
+	if(i>=NR_TASKS){
+		return -1;
+	}
+
 
   /* Setup Page Directory and pages for kernel*/
   if (!(ts->pgdir = setupkvm()))
     panic("Not enough memory for per process page directory!\n");
 
   /* Setup User Stack */
-
+	uintptr_t us_start = (uintptr_t) ROUNDDOWN( USTACKTOP - USR_STACK_SIZE, PGSIZE);
+	uintptr_t us_end = (uintptr_t) ROUNDDOWN(USTACKTOP, PGSIZE);
+	for (; us_start < us_end; us_start += PGSIZE) {
+		struct PageInfo *pp = page_alloc(0);
+		if (!pp) {
+			panic("page_alloc(0) failed");
+		} else {
+			if (page_insert(ts->pgdir, pp, (void *) us_start, PTE_U | PTE_W) == - E_NO_MEM ) 
+				panic("page_insert: failed to alloc at %p of len %x\n", USTACKTOP - USR_STACK_SIZE);
+		}
+		
+	}
+	printk("let's set the page \n");
 	/* Setup Trapframe */
 	memset( &(ts->tf), 0, sizeof(ts->tf));
 
@@ -117,6 +144,12 @@ int task_create()
 	ts->tf.tf_esp = USTACKTOP-PGSIZE;
 
 	/* Setup task structure (task_id and parent_id) */
+	ts -> task_id = i;
+	ts->state = TASK_RUNNABLE;
+	ts->parent_id = (cur_task == NULL)?0:cur_task->task_id;
+	ts->remind_ticks = TIME_QUANT;
+	
+	return i;
 }
 
 
@@ -139,6 +172,39 @@ int task_create()
  */
 static void task_free(int pid)
 {
+/*
+	pte_t *pt;
+	uint32_t pdeno, pteno;
+	physaddr_t pa;
+	
+	if(&tasks[pid] == cur_task){
+		lcr3(PADDR(kern_pgdir));
+	}
+	static_assert(UTOP%PTSIZE ==0);
+	for (pdeno =0; pdeno < PDX(UTOP);pdeno++){
+	
+		if(!(tasks[pid].pgdir[pdeno] & PTE_P))
+			continue;
+		pa = PTE_ADDR(tasks[pid].pgdir);
+		pt = (pte_t*) KADDR(pa);
+	
+		for (pteno = 0; pteno <= PTX(~0); pteno++){
+			if(pt[pteno]&PTE_P)
+				page_remove(tasks[pid].pgdir,PGADDR(pdeno,pteno,0));
+		}
+	
+		tasks[pid].pgdir[pdeno] = 0;
+		page_decref(pa2page(pa));
+	}	
+	
+	pa = PADDR(tasks[pid].pgdir);
+	tasks[pid].pgdir = 0;
+	page_decref(pa2page(pa));
+
+	tasks[pid].state = TASK_FREE;
+//	tasks[pid].
+
+*/
 }
 
 void sys_kill(int pid)
@@ -150,6 +216,8 @@ void sys_kill(int pid)
    * Free the memory
    * and invoke the scheduler for yield
    */
+	tasks[pid].state = TASK_STOP;
+	sched_yield();
 	}
 }
 
@@ -181,15 +249,33 @@ int sys_fork()
 {
   /* pid for newly created process */
   int pid;
+
+	/*step 1. create task*/	
+	pid = task_create();
+	if(pid<0)
+		return -1;
+
 	if ((uint32_t)cur_task)
 	{
-    /* Step 4: All user program use the same code for now */
-    setupvm(tasks[pid].pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
-    setupvm(tasks[pid].pgdir, (uint32_t)UDATA_start, UDATA_SZ);
-    setupvm(tasks[pid].pgdir, (uint32_t)UBSS_start, UBSS_SZ);
-    setupvm(tasks[pid].pgdir, (uint32_t)URODATA_start, URODATA_SZ);
+		/*step 2. copy trap frame*/
+	        tasks[pid].tf = cur_task -> tf;
+		/*step 3. copy the content of the stack*/
+		memcpy(tasks[pid].pgdir,cur_task->pgdir,USR_STACK_SIZE);
 
+
+	    	/* Step 4: All user program use the same code for now */
+   		setupvm(tasks[pid].pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
+    		setupvm(tasks[pid].pgdir, (uint32_t)UDATA_start, UDATA_SZ);
+    		setupvm(tasks[pid].pgdir, (uint32_t)UBSS_start, UBSS_SZ);
+    		setupvm(tasks[pid].pgdir, (uint32_t)URODATA_start, URODATA_SZ);
+
+		/*step5. syscall return value, parent return 0 and child return pid.*/
+		tasks[pid].task_id = pid;
+		tasks[pid].parent_id = cur_task->task_id;
+		return 0;
+	
 	}
+	return 0;
 }
 
 /* TODO: Lab5

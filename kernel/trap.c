@@ -192,7 +192,7 @@ void default_trap_handler(struct Trapframe *tf)
 void page_fault_handler(struct Trapframe *tf)
 {
     printk("Page fault @ %p\n", rcr2());
-    while (1);
+	while (1);
 }
 
 void trap_init()
@@ -212,6 +212,10 @@ void trap_init()
 	SETGATE(idt[T_GPFLT], 1, GD_KT, GPFLT, 0);
 	extern void STACK_ISR();
 	SETGATE(idt[T_STACK], 1, GD_KT, STACK_ISR, 0);
+
+	//extern void SYSCALL();
+	//SETGATE(idt[T_SYSCALL],1,GD_KT, SYSCALL,0);	
+
 
   /* Using custom trap handler */
 	extern void PGFLT();

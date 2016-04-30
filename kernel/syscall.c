@@ -103,7 +103,14 @@ static void syscall_handler(struct Trapframe *tf)
    * Please remember to fill in the return value
    * HINT: You have to know where to put the return value
    */
-
+	int32_t ret = -1;
+	ret = do_syscall(tf->tf_regs.reg_eax,
+				tf->tf_regs.reg_edx,
+				tf->tf_regs.reg_ecx,
+				tf->tf_regs.reg_ebx,
+				tf->tf_regs.reg_edi,
+				tf->tf_regs.reg_esi);
+	tf->tf_regs.reg_eax = ret;
 }
 
 void syscall_init()
@@ -112,6 +119,10 @@ void syscall_init()
    * Please set gate of system call into IDT
    * You can leverage the API register_handler in kernel/trap.c
    */
+	extern void SYSCALL();
+//	register_handler(int trapno, TrapHandler hnd, void (*trap_entry)(void), int isTrap, int dpl)
+	register_handler(T_SYSCALL, syscall_handler, SYSCALL, 1, 3);
+	// then declare SYSCALL in entry_trap.S
 
 }
 
