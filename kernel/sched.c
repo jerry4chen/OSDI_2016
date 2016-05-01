@@ -59,4 +59,6 @@ void sched_yield(void)
 		
 	}
 
-	env_pop_tf(&cur_task->tf);}
+	env_pop_tf(&cur_task->tf);
+
+}

@@ -2,10 +2,11 @@
 #include <inc/types.h>
 #include <inc/string.h>
 #include <inc/x86.h>
-#include <inc/error.h>
 #include <inc/memlayout.h>
 #include <kernel/task.h>
 #include <kernel/mem.h>
+
+#include <inc/error.h>
 
 // Global descriptor table.
 //
@@ -98,11 +99,11 @@ extern void sched_yield(void);
  */
 int task_create()
 {
+	int i =0;
 	Task *ts = NULL;
 
 	/* Find a free task structure */
 	
-	int i =0;
 	for (i =0; i< NR_TASKS; i++)
 	{
 		if (tasks[i].state == TASK_FREE || tasks[i].state == TASK_STOP)
@@ -111,14 +112,17 @@ int task_create()
 			break;
 		}		
 	}
-	if(i>=NR_TASKS){
+/*	if(i>=NR_TASKS){
 		return -1;
 	}
 
-
+*/
   /* Setup Page Directory and pages for kernel*/
   if (!(ts->pgdir = setupkvm()))
     panic("Not enough memory for per process page directory!\n");
+	
+	
+	if(i>=NR_TASKS) return -1;
 
   /* Setup User Stack */
 	uintptr_t us_start = (uintptr_t) ROUNDDOWN( USTACKTOP - USR_STACK_SIZE, PGSIZE);
@@ -129,11 +133,10 @@ int task_create()
 			panic("page_alloc(0) failed");
 		} else {
 			if (page_insert(ts->pgdir, pp, (void *) us_start, PTE_U | PTE_W) == - E_NO_MEM ) 
-				panic("page_insert: failed to alloc at %p of len %x\n", USTACKTOP - USR_STACK_SIZE);
+				panic("page_insert: failed to alloc at %p\n", USTACKTOP - USR_STACK_SIZE);
 		}
 		
 	}
-	printk("let's set the page \n");
 	/* Setup Trapframe */
 	memset( &(ts->tf), 0, sizeof(ts->tf));
 
@@ -172,7 +175,7 @@ int task_create()
  */
 static void task_free(int pid)
 {
-/*
+
 	pte_t *pt;
 	uint32_t pdeno, pteno;
 	physaddr_t pa;
@@ -202,9 +205,8 @@ static void task_free(int pid)
 	page_decref(pa2page(pa));
 
 	tasks[pid].state = TASK_FREE;
-//	tasks[pid].
 
-*/
+
 }
 
 void sys_kill(int pid)
@@ -248,19 +250,19 @@ void sys_kill(int pid)
 int sys_fork()
 {
   /* pid for newly created process */
-  int pid;
-
+  int pid=-1;
+	int offset =0;
 	/*step 1. create task*/	
 	pid = task_create();
 	if(pid<0)
 		return -1;
 
-	if ((uint32_t)cur_task)
+	if ((uint32_t)cur_task!=NULL)
 	{
 		/*step 2. copy trap frame*/
-	        tasks[pid].tf = cur_task -> tf;
+       		tasks[pid].tf = cur_task -> tf;
 		/*step 3. copy the content of the stack*/
-		memcpy(tasks[pid].pgdir,cur_task->pgdir,USR_STACK_SIZE);
+//		memcpy(tasks[pid].pgdir,cur_task->pgdir,USR_STACK_SIZE);
 
 
 	    	/* Step 4: All user program use the same code for now */
@@ -268,10 +270,11 @@ int sys_fork()
     		setupvm(tasks[pid].pgdir, (uint32_t)UDATA_start, UDATA_SZ);
     		setupvm(tasks[pid].pgdir, (uint32_t)UBSS_start, UBSS_SZ);
     		setupvm(tasks[pid].pgdir, (uint32_t)URODATA_start, URODATA_SZ);
-
+		
+		tasks[pid].tf = cur_task->tf;
 		/*step5. syscall return value, parent return 0 and child return pid.*/
-		tasks[pid].task_id = pid;
-		tasks[pid].parent_id = cur_task->task_id;
+		tasks[pid].tf.tf_regs.reg_eax = pid;
+		//tasks[pid].parent_id = cur_task->task_id;
 		return 0;
 	
 	}
@@ -333,7 +336,6 @@ void task_init()
 	ltr(GD_TSS0);
 
 	cur_task->state = TASK_RUNNING;
-	
 }
 
 
