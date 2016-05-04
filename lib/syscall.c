@@ -61,7 +61,7 @@ unsigned long get_ticks(void){
 
 }
 void kill_self(){
-	syscall(SYS_kill,0,0,0,0,0);
+	syscall(SYS_kill, getpid(),0,0,0,0);
 }
 
 

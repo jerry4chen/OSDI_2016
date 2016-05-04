@@ -1,4 +1,4 @@
-/* Reference: http://www.osdever.net/bkerndev/Docs/pit.htm */
+
 #include <kernel/trap.h>
 #include <kernel/picirq.h>
 #include <kernel/task.h>
@@ -35,6 +35,27 @@ void timer_handler(struct Trapframe *tf)
    * Check if it is needed to wakeup sleep task
    * If remind_ticks <= 0, yield the task
    */
+
+	for (i=0;i<NR_TASKS;i++){
+		switch(tasks[i].state){
+			case TASK_SLEEP:
+			tasks[i].remind_ticks--;
+			if(tasks[i].remind_ticks <=0){
+				tasks[i].state = TASK_RUNNABLE;
+				tasks[i].remind_ticks = TIME_QUANT;
+			}
+			break;
+			
+			case TASK_RUNNING:
+				tasks[i].remind_ticks--;
+				break;
+			default:
+				;
+		}
+	}
+	
+	if(cur_task->remind_ticks<=0)
+	sched_yield();
   }
 }
 

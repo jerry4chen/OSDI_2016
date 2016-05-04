@@ -128,16 +128,16 @@ int forktest(int argc, char **argv)
     /*Child*/
     task_job();
     if (fork())
-      task_job();
+      task_job();//  task1 
     else
     {
       if (fork())
-        task_job();
+        task_job(); //task2
       else
         if (fork())
-          task_job();
+          task_job(); //task3 
         else
-          task_job();
+          task_job(); //task4
     }
   }
   /* task recycle */

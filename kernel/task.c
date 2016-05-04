@@ -106,27 +106,26 @@ int task_create()
 	
 	for (i =0; i< NR_TASKS; i++)
 	{
-		if (tasks[i].state == TASK_FREE || tasks[i].state == TASK_STOP)
+		if (tasks[i].state == TASK_FREE|| tasks[i].state == TASK_STOP)
 		{
 			ts = &(tasks[i]);
 			break;
 		}		
 	}
-/*	if(i>=NR_TASKS){
+	if(i>=NR_TASKS){
 		return -1;
 	}
 
-*/
   /* Setup Page Directory and pages for kernel*/
   if (!(ts->pgdir = setupkvm()))
     panic("Not enough memory for per process page directory!\n");
 	
 	
-	if(i>=NR_TASKS) return -1;
-
   /* Setup User Stack */
-	uintptr_t us_start = (uintptr_t) ROUNDDOWN( USTACKTOP - USR_STACK_SIZE, PGSIZE);
-	uintptr_t us_end = (uintptr_t) ROUNDDOWN(USTACKTOP, PGSIZE);
+	uint32_t us_start =  USTACKTOP - USR_STACK_SIZE;
+	uint32_t us_end = USTACKTOP;
+//	printk("cur_stack: %x, lookup:%x\n",cur_task->pgdir, page_lookup(cur_task->pgdir));
+		
 	for (; us_start < us_end; us_start += PGSIZE) {
 		struct PageInfo *pp = page_alloc(0);
 		if (!pp) {
@@ -134,6 +133,7 @@ int task_create()
 		} else {
 			if (page_insert(ts->pgdir, pp, (void *) us_start, PTE_U | PTE_W) == - E_NO_MEM ) 
 				panic("page_insert: failed to alloc at %p\n", USTACKTOP - USR_STACK_SIZE);
+		//	printk("hi:%x, %x\n",us_start,us_end);
 		}
 		
 	}
@@ -175,7 +175,7 @@ int task_create()
  */
 static void task_free(int pid)
 {
-
+/*
 	pte_t *pt;
 	uint32_t pdeno, pteno;
 	physaddr_t pa;
@@ -190,7 +190,8 @@ static void task_free(int pid)
 			continue;
 		pa = PTE_ADDR(tasks[pid].pgdir);
 		pt = (pte_t*) KADDR(pa);
-	
+
+		// clear page table	
 		for (pteno = 0; pteno <= PTX(~0); pteno++){
 			if(pt[pteno]&PTE_P)
 				page_remove(tasks[pid].pgdir,PGADDR(pdeno,pteno,0));
@@ -198,7 +199,7 @@ static void task_free(int pid)
 	
 		tasks[pid].pgdir[pdeno] = 0;
 		page_decref(pa2page(pa));
-	}	
+	}e
 	
 	pa = PADDR(tasks[pid].pgdir);
 	tasks[pid].pgdir = 0;
@@ -206,11 +207,43 @@ static void task_free(int pid)
 
 	tasks[pid].state = TASK_FREE;
 
+*/
+	pte_t *pt;
+	uint32_t pa;
+	
 
+	/*Step 1. avoid pagefault*/
+	if(cur_task == &tasks[pid])
+		lcr3(PADDR(kern_pgdir));
+	
+	/*step 2. remove user stack pages*/
+	uint32_t us_start = USTACKTOP - USR_STACK_SIZE;
+	uint32_t us_end = USTACKTOP;
+	        for (; us_start < us_end; us_start += PGSIZE) {
+               	 	page_remove(tasks[pid].pgdir, us_start);
+		}
+	/*step 3. remove page table's page*/
+	//pt = (pte_t*)KADDR(PTE_ADDR(tasks[pid].pgdir));	
+	//ptable_remove(tasks[pid].pgdir);	
+	//uint32_t kaaa= page2kva(tasks[pid].pgdir);	
+	//page_free(kaaa);
+	//pt
+ptable_remove(tasks[pid].pgdir);	
+
+	/*step 4. remove page directory's page*/
+//	pa = PADDR(tasks[pid].pgdir);
+//	tasks[pid].pgdir = 0;
+//	page_decref(pa2page(pa));
+	
+//	ptable_remove(tasks[pid].pgdir);
+//	pgdir_remove(tasks[pid].pgdir);
+	
+               
 }
 
 void sys_kill(int pid)
-{
+{	
+	printk("sys_kill(%d)\n",pid);
 	if (pid > 0 && pid < NR_TASKS)
 	{
 	/* TODO: Lab 5
@@ -219,6 +252,7 @@ void sys_kill(int pid)
    * and invoke the scheduler for yield
    */
 	tasks[pid].state = TASK_STOP;
+	task_free(pid);
 	sched_yield();
 	}
 }
@@ -252,31 +286,47 @@ int sys_fork()
   /* pid for newly created process */
   int pid=-1;
 	int offset =0;
+int i;
 	/*step 1. create task*/	
 	pid = task_create();
 	if(pid<0)
 		return -1;
-
+	
 	if ((uint32_t)cur_task!=NULL)
 	{
 		/*step 2. copy trap frame*/
        		tasks[pid].tf = cur_task -> tf;
+		
 		/*step 3. copy the content of the stack*/
-//		memcpy(tasks[pid].pgdir,cur_task->pgdir,USR_STACK_SIZE);
+	   	pte_t *pte; 
+		uint32_t start = USTACKTOP-USR_STACK_SIZE;
+		uint32_t end = USTACKTOP;
+		int i=0;
+  		for (;start<end;start+=PGSIZE){
+			struct PageInfo* ppdst = page_lookup(tasks[pid].pgdir,start,NULL);
+			memcpy(page2kva(ppdst),start,PGSIZE);
+		}
 
-
-	    	/* Step 4: All user program use the same code for now */
+		/* Step 4: All user program use the same code for now */
    		setupvm(tasks[pid].pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
     		setupvm(tasks[pid].pgdir, (uint32_t)UDATA_start, UDATA_SZ);
     		setupvm(tasks[pid].pgdir, (uint32_t)UBSS_start, UBSS_SZ);
     		setupvm(tasks[pid].pgdir, (uint32_t)URODATA_start, URODATA_SZ);
+
+
+		/*5. The very important step is to let child and parent be distinguishable! */
+		tasks[pid].tf.tf_regs.reg_eax = 0;
+		cur_task->tf.tf_regs.reg_eax = pid;
+		//tasks[pid].task_id = pid;		
+	//		cur_task->tf.tf_regs.reg_eax = pid;
+	//	tasks[pid].task_id =  cur_task->task_id;
 		
-		tasks[pid].tf = cur_task->tf;
-		/*step5. syscall return value, parent return 0 and child return pid.*/
-		tasks[pid].tf.tf_regs.reg_eax = pid;
-		//tasks[pid].parent_id = cur_task->task_id;
-		return 0;
-	
+		//tasks[pid].parent_id=cur_task->task_id;
+		//cur_task->task_id = ;	
+		
+//		if(cur_task->task_id != pid)
+//		return pid;
+		return 0;	
 	}
 	return 0;
 }

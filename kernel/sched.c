@@ -27,6 +27,7 @@ void sched_yield(void)
 	int i;
 	int next_i =0;
 	
+//	printk("sched. cur_task:%d\n",cur_task->task_id);		
 	i = (cur_task->task_id+1)% NR_TASKS;
 	for (; next_i < NR_TASKS; next_i++)
 	{
@@ -56,9 +57,9 @@ void sched_yield(void)
 			tasks[i].remind_ticks = TIME_QUANT;
 		}
 		i = (i+1)% NR_TASKS;
+	}
+	lcr3(PADDR(cur_task->pgdir));
+	ctx_switch(cur_task);
 		
 	}
 
-	env_pop_tf(&cur_task->tf);
-
-}
