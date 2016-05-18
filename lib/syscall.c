@@ -5,10 +5,10 @@
    ret_t name(void) { return syscall((SYS_##name), 0, 0, 0, 0, 0); }
 
 
-static inline int32_t
+static inline  int32_t
 syscall(int num, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5)
 {
-	int32_t ret;
+	/*volatile*/ int32_t ret;
 
 	// Generic system call: pass system call number in AX,
 	// up to five parameters in DX, CX, BX, DI, SI.
@@ -21,7 +21,7 @@ syscall(int num, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5
 	// The last clause tells the assembler that this can
 	// potentially change the condition codes and arbitrary
 	// memory locations.
-
+	//ret =2;
 	asm volatile("int %1\n"
 		: "=a" (ret)
 		: "i" (T_SYSCALL),

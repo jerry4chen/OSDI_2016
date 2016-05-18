@@ -175,46 +175,13 @@ int task_create()
  */
 static void task_free(int pid)
 {
-/*
-	pte_t *pt;
-	uint32_t pdeno, pteno;
-	physaddr_t pa;
-	
-	if(&tasks[pid] == cur_task){
-		lcr3(PADDR(kern_pgdir));
-	}
-	static_assert(UTOP%PTSIZE ==0);
-	for (pdeno =0; pdeno < PDX(UTOP);pdeno++){
-	
-		if(!(tasks[pid].pgdir[pdeno] & PTE_P))
-			continue;
-		pa = PTE_ADDR(tasks[pid].pgdir);
-		pt = (pte_t*) KADDR(pa);
-
-		// clear page table	
-		for (pteno = 0; pteno <= PTX(~0); pteno++){
-			if(pt[pteno]&PTE_P)
-				page_remove(tasks[pid].pgdir,PGADDR(pdeno,pteno,0));
-		}
-	
-		tasks[pid].pgdir[pdeno] = 0;
-		page_decref(pa2page(pa));
-	}e
-	
-	pa = PADDR(tasks[pid].pgdir);
-	tasks[pid].pgdir = 0;
-	page_decref(pa2page(pa));
-
-	tasks[pid].state = TASK_FREE;
-
-*/
 	pte_t *pt;
 	uint32_t pa;
-	
 
 	/*Step 1. avoid pagefault*/
 	if(cur_task == &tasks[pid])
 		lcr3(PADDR(kern_pgdir));
+	
 	
 	/*step 2. remove user stack pages*/
 	uint32_t us_start = USTACKTOP - USR_STACK_SIZE;
@@ -228,7 +195,7 @@ static void task_free(int pid)
 	//uint32_t kaaa= page2kva(tasks[pid].pgdir);	
 	//page_free(kaaa);
 	//pt
-ptable_remove(tasks[pid].pgdir);	
+	ptable_remove(tasks[pid].pgdir);	
 
 	/*step 4. remove page directory's page*/
 //	pa = PADDR(tasks[pid].pgdir);
