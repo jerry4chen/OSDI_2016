@@ -7,6 +7,7 @@ enum {
 	SYS_puts = 0,
 	SYS_getc,
 	SYS_getpid,
+	SYS_getcid,
 	SYS_fork,
 	SYS_kill,
 	SYS_sleep,
@@ -33,7 +34,14 @@ int32_t fork(void);
 
 int32_t getpid(void);
 
+/*<<<<<<< HEAD
 void kill_self(void);
+=======
+*/
+int32_t getcid(void);
+
+void kill_self();
+//>>>>>>> 3fe20efc26a5a63f2a8eb423231bc2cb1a987070
 
 void sleep(uint32_t ticks);
 
