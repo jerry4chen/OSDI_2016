@@ -269,7 +269,13 @@ mem_init_mp(void)
 	//     Permissions: kernel RW, user NONE
 	// TODO:
 	// Lab6: Your code here:
-
+	
+	uint32_t n, va, pa;
+	for (n=0; n<NCPU; n++){
+		va = KSTACKTOP - n* (KSTKSIZE+ KSTKGAP)-KSTKSIZE;
+		pa = PADDR(percpu_kstacks[n]);
+		boot_map_region(kern_pgdir, va, KSTKSIZE, pa, PTE_W);
+	}
 }
 
 // --------------------------------------------------------------
@@ -324,6 +330,7 @@ page_init(void)
 //>>>>>>> 3fe20efc26a5a63f2a8eb423231bc2cb1a987070
 	for (i = 0; i < npages; i++) {
 		if (i == 0 || // First page reserved for BIOS structures
+			i== PGNUM(MPENTRY_PADDR) ||
 			(npages_basemem <= i && i < npages_basemem + num_pages_io_hole) || 
 			(npages_basemem + num_pages_io_hole <= i && i <  num_kpages)) {
 	pages[i].pp_ref = 1;
@@ -634,9 +641,22 @@ mmio_map_region(physaddr_t pa, size_t size)
 	//
 	// Lab6 TODO
 	// Your code here:
+	uintptr_t saved_base;
 	
+	size = ROUNDUP(size, PGSIZE);
+	
+	if(size> MMIOLIM){
+		panic("in kernel/mem.c: mmio_map_region\n");
+	}
+	
+	boot_map_region(kern_pgdir, base, size, pa, PTE_PCD|PTE_PWT|PTE_W);
+	
+	saved_base = base;
+	
+	base += size;  //base is static
+	return (void *)saved_base;
 
-	panic("mmio_map_region not implemented");
+//	panic("mmio_map_region not implemented");
 }
 
 /* This is a simple wrapper function for mapping user program */
@@ -680,7 +700,18 @@ setupkvm()
 	boot_map_region(this, KSTACKTOP-KSTKSIZE,KSTKSIZE,PADDR(bootstack),PTE_W|PTE_P);
 	boot_map_region(this, KERNBASE, 0xffffffff-KERNBASE,0,PTE_W|PTE_P);
 	boot_map_region(this, IOPHYSMEM, ROUNDUP((EXTPHYSMEM - IOPHYSMEM), PGSIZE), IOPHYSMEM, (PTE_W) | (PTE_P));
-			
+	
+	//Lab6			
+	//for(i=1;i<=NCPU;i++)
+	//boot_map_region(this, KSTACKTOP - i*KSTKSIZE, KSTKSIZE, PADDR());
+	uint32_t n,va,pa;
+	for (n=0; n<NCPU; n++){
+                  va = KSTACKTOP - n * (KSTKSIZE+ KSTKGAP)-KSTKSIZE;
+                  pa = PADDR(percpu_kstacks[n]);
+                  boot_map_region(this, va, KSTKSIZE, pa, PTE_W|PTE_P);
+        }
+	boot_map_region(this, MMIOBASE, PTSIZE, MMIOBASE, PTE_W|PTE_P);
+	
 	this[PDX(UVPT)] = (PADDR(this) | PTE_U | PTE_P);//*pde = (page2pa(new_page) | PTE_P | PTE_U | PTE_W);
 	return this;
 
