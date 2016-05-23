@@ -357,40 +357,57 @@ void task_init_percpu()
 	int i;
 	extern int user_entry();
 	extern int idle_entry();
-	
+
+	/*
+ 	* init TSS	 	
+ 	* */	
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
-	memset(&(tss), 0, sizeof(tss));
-	tss.ts_esp0 = (uint32_t)bootstack + KSTKSIZE;
-	tss.ts_ss0 = GD_KD;
+	memset(&(thiscpu->cpu_tss), 0, sizeof(tss));
+	thiscpu->cpu_tss.ts_esp0 = (uintptr_t)percpu_kstacks[thiscpu->cpu_id] + KSTKSIZE;
+	thiscpu->cpu_tss.ts_ss0 = GD_KD;	
 
 	// fs and gs stay in user data segment
-	tss.ts_fs = GD_UD | 0x03;
-	tss.ts_gs = GD_UD | 0x03;
+	thiscpu->cpu_tss.ts_fs = GD_UD | 0x03;
+	thiscpu->cpu_tss.ts_gs = GD_UD | 0x03;
 
 	/* Setup TSS in GDT */
-	gdt[GD_TSS0 >> 3] = SEG16(STS_T32A, (uint32_t)(&tss), sizeof(struct tss_struct), 0);
-	gdt[GD_TSS0 >> 3].sd_s = 0;
+	gdt[((GD_TSS0 >> 3)+thiscpu->cpu_id)] = SEG16(STS_T32A, (uint32_t)(&(thiscpu->cpu_tss)), sizeof(struct tss_struct), 0);
+	gdt[((GD_TSS0 >> 3)+thiscpu->cpu_id)].sd_s = 0;
 
+	/*
+	 * init cpuRunqueue and idle task 
+ 	 * */
+	for(i=0;i<NR_TASKS;i++){
+		memset(&(thiscpu->cpu_rq.list[i]), 0, sizeof(Task));
+		thiscpu->cpu_rq.list[i].state=TASK_FREE;
+	}
+	
 	/* Setup first task */
 	i = task_create();
-	cur_task = &(tasks[i]);
+	thiscpu->cpu_task = &(tasks[i]);
 
 	/* For user program */
-	setupvm(cur_task->pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
-	setupvm(cur_task->pgdir, (uint32_t)UDATA_start, UDATA_SZ);
-	setupvm(cur_task->pgdir, (uint32_t)UBSS_start, UBSS_SZ);
-	setupvm(cur_task->pgdir, (uint32_t)URODATA_start, URODATA_SZ);
-	cur_task->tf.tf_eip = (uint32_t)user_entry;
+	setupvm(thiscpu->cpu_task->pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
+	setupvm(thiscpu->cpu_task->pgdir, (uint32_t)UDATA_start, UDATA_SZ);
+	setupvm(thiscpu->cpu_task->pgdir, (uint32_t)UBSS_start, UBSS_SZ);
+	setupvm(thiscpu->cpu_task->pgdir, (uint32_t)URODATA_start, URODATA_SZ);
 
+	printk("cpunum:%d\n",cpunum());
+
+	if(cpunum()==0)
+		thiscpu->cpu_task->tf.tf_eip = (uint32_t)user_entry;
+	else
+		thiscpu->cpu_task->tf.tf_eip = (uint32_t)idle_entry;
+	
+	/*init registers*/
 	/* Load GDT&LDT */
 	lgdt(&gdt_pd);
-
-
 	lldt(0);
-
 	// Load the TSS selector 
-	ltr(GD_TSS0);
-
-	cur_task->state = TASK_RUNNING;
+	ltr(GD_TSS0+thiscpu->cpu_id*sizeof(struct Segdesc));
+	
+	thiscpu->cpu_rq.index = i;
+	thiscpu->cpu_rq.list[0] = *thiscpu->cpu_task;
+	thiscpu->cpu_task->state = TASK_RUNNING;
 }

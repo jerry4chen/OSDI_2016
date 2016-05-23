@@ -41,7 +41,10 @@ typedef struct
 //
 typedef struct
 {
-
+	// versoin1 by jerry
+	int index; 
+	Task list[NR_TASKS];
+	
 } Runqueue;
 
 

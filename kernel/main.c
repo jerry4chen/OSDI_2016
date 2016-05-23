@@ -77,6 +77,30 @@ boot_aps(void)
 	//      -- Wait for the CPU to finish some basic setup in mp_main(
 	// 
 	// Your code here:
+	//
+	//
+	extern unsigned char mpentry_start[], mpentry_end[];//in mpentry.S
+	void *code;
+	struct CpuInfo *c;
+	
+	//1. 
+	code = KADDR(MPENTRY_PADDR);
+	memmove(code, mpentry_start, mpentry_end - mpentry_start);
+	printk("befroe\n");
+	//2.
+	for(c = cpus; c < cpus+ncpu; c++){
+		if(c == cpus+cpunum())
+			continue;
+		
+		mpentry_kstack = percpu_kstacks[c - cpus]+KSTKSIZE;
+		lapic_startap( c->cpu_id , PADDR(code));
+		while( c->cpu_status != CPU_STARTED)
+			;
+
+	}
+	 printk("after\n");
+
+	
 }
 
 // Setup code for APs
@@ -129,7 +153,7 @@ mp_main(void)
 	 *
 	 * TODO: Lab6
 	 *
-	 * 1. Modify mem_init_mp() (in kernel/mem.c) to map per-CPU stacks.
+	 * v 1. Modify mem_init_mp() (in kernel/mem.c) to map per-CPU stacks.
 	 *    Your code should pass the new check in check_kern_pgdir().
 	 *
 	 * 2. chage per-CPU current task pointer and TSS descriptor ( the tss and
@@ -150,14 +174,16 @@ mp_main(void)
 	printk("SMP: CPU %d starting\n", cpunum());
 	
 	// Your code here:
+	lapic_init();
+	task_init_percpu();
 	
 
 	// TODO: Lab6
 	// Now that we have finished some basic setup, it's time to tell
 	// boot_aps() we're up ( using xchg )
 	// Your code here:
-
-
+	xchg(&thiscpu->cpu_status, CPU_STARTED);
+	sched_yield();	
 
 	/* Enable interrupt */
 	__asm __volatile("sti");

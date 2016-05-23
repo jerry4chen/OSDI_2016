@@ -697,7 +697,7 @@ setupkvm()
 	pde_t *this = page2kva(pp);
 //	memcpy(this, kern_pgdir, PGSIZE);
 	boot_map_region(this, UPAGES, ROUNDUP((sizeof(struct PageInfo) * npages), PGSIZE), PADDR(pages), (PTE_U | PTE_P));
-	boot_map_region(this, KSTACKTOP-KSTKSIZE,KSTKSIZE,PADDR(bootstack),PTE_W|PTE_P);
+//	boot_map_region(this, KSTACKTOP-KSTKSIZE,KSTKSIZE,PADDR(bootstack),PTE_W|PTE_P);
 	boot_map_region(this, KERNBASE, 0xffffffff-KERNBASE,0,PTE_W|PTE_P);
 	boot_map_region(this, IOPHYSMEM, ROUNDUP((EXTPHYSMEM - IOPHYSMEM), PGSIZE), IOPHYSMEM, (PTE_W) | (PTE_P));
 	
@@ -705,14 +705,24 @@ setupkvm()
 	//for(i=1;i<=NCPU;i++)
 	//boot_map_region(this, KSTACKTOP - i*KSTKSIZE, KSTKSIZE, PADDR());
 	uint32_t n,va,pa;
-	for (n=0; n<NCPU; n++){
+/*	for (n=0; n<NCPU; n++){
                   va = KSTACKTOP - n * (KSTKSIZE+ KSTKGAP)-KSTKSIZE;
                   pa = PADDR(percpu_kstacks[n]);
                   boot_map_region(this, va, KSTKSIZE, pa, PTE_W|PTE_P);
         }
-	boot_map_region(this, MMIOBASE, PTSIZE, MMIOBASE, PTE_W|PTE_P);
-	
-	this[PDX(UVPT)] = (PADDR(this) | PTE_U | PTE_P);//*pde = (page2pa(new_page) | PTE_P | PTE_U | PTE_W);
+*/
+	uintptr_t kstacktop_i;
+	kstacktop_i = KSTACKTOP - cpunum()*(KSTKSIZE+KSTKGAP);
+	boot_map_region(this,kstacktop_i - KSTKSIZE, ROUNDUP(KSTKSIZE, PGSIZE),PADDR(percpu_kstacks[cpunum()]), (PTE_W|PTE_P));
+	pte_t ptemmio;
+	physaddr_t mmiophysmem = page2pa(page_lookup(kern_pgdir,MMIOBASE, &ptemmio));
+	//page_lookup(kern_pgdir,)
+	//boot_map_region(this, MMIOBASE, PTSIZE, PADDR(lapicaddr), PTE_W|PTE_P);
+	extern volatile uint32_t *lapic;
+	extern physaddr_t lapicaddr;
+	boot_map_region(this, lapic, PGSIZE, lapicaddr, PTE_W|PTE_P);
+//	printk("mmio:%x, lapicaddr:%x\n",mmiophysmem,PADDR(lapicaddr));
+//	this[PDX(UVPT)] = (PADDR(this) | PTE_U | PTE_P);//*pde = (page2pa(new_page) | PTE_P | PTE_U | PTE_W);
 	return this;
 
 
