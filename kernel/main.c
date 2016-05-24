@@ -40,7 +40,7 @@ void kernel_main(void)
   /* Enable interrupt */
   __asm __volatile("sti");
 
-  lcr3(PADDR(cur_task->pgdir));
+  lcr3(PADDR(thiscpu->cpu_task->pgdir));
 
   /* Move to user mode */
   asm volatile("movl %0,%%eax\n\t" \
@@ -50,7 +50,7 @@ void kernel_main(void)
   "pushl %2\n\t" \
   "pushl %3\n\t" \
   "iret\n" \
-  :: "m" (cur_task->tf.tf_esp), "i" (GD_UD | 0x03), "i" (GD_UT | 0x03), "m" (cur_task->tf.tf_eip)
+  :: "m" (thiscpu->cpu_task->tf.tf_esp), "i" (GD_UD | 0x03), "i" (GD_UT | 0x03), "m" (thiscpu->cpu_task->tf.tf_eip)
   :"ax");
 }
 
@@ -86,8 +86,16 @@ boot_aps(void)
 	//1. 
 	code = KADDR(MPENTRY_PADDR);
 	memmove(code, mpentry_start, mpentry_end - mpentry_start);
-	printk("befroe\n");
 	//2.
+	uint32_t n;
+	for(n=0;n<ncpu;n++){
+		mpentry_kstack = percpu_kstacks[n]+KSTKSIZE;
+		lapic_startap(n,PADDR(code));
+		while(cpus[n].cpu_status!=CPU_STARTED)
+			;
+	
+	}
+	/*
 	for(c = cpus; c < cpus+ncpu; c++){
 		if(c == cpus+cpunum())
 			continue;
@@ -98,7 +106,7 @@ boot_aps(void)
 			;
 
 	}
-	 printk("after\n");
+	*/
 
 	
 }
@@ -175,15 +183,17 @@ mp_main(void)
 	
 	// Your code here:
 	lapic_init();
+	trap_init();
 	task_init_percpu();
-	
 
 	// TODO: Lab6
 	// Now that we have finished some basic setup, it's time to tell
 	// boot_aps() we're up ( using xchg )
 	// Your code here:
+//for(;;);	
 	xchg(&thiscpu->cpu_status, CPU_STARTED);
-	sched_yield();	
+	//for(;;);
+//	sched_yield();	
 
 	/* Enable interrupt */
 	__asm __volatile("sti");

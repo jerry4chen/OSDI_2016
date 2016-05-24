@@ -150,7 +150,7 @@ int task_create()
 	/* Setup task structure (task_id and parent_id) */
 	ts -> task_id = i;
 	ts->state = TASK_RUNNABLE;
-	ts->parent_id = (cur_task == NULL)?0:cur_task->task_id;
+	ts->parent_id = (thiscpu->cpu_task == NULL)?0:thiscpu->cpu_task->task_id;
 	ts->remind_ticks = TIME_QUANT;
 	
 	return i;
@@ -182,7 +182,7 @@ static void task_free(int pid)
 	uint32_t pa;
 
 	/*Step 1. avoid pagefault*/
-	if(cur_task == &tasks[pid])
+	if(thiscpu->cpu_task == &tasks[pid])
 		lcr3(PADDR(kern_pgdir));
 	
 	
@@ -275,10 +275,10 @@ int i;
 	if(pid<0)
 		return -1;
 	
-	if ((uint32_t)cur_task!=NULL)
+	if ((uint32_t)thiscpu->cpu_task!=NULL)
 	{
 		/*step 2. copy trap frame*/
-       		tasks[pid].tf = cur_task -> tf;
+       		tasks[pid].tf = thiscpu->cpu_task -> tf;
 		
 		/*step 3. copy the content of the stack*/
 	   	pte_t *pte; 
@@ -299,7 +299,7 @@ int i;
 
 		/*5. The very important step is to let child and parent be distinguishable! */
 		tasks[pid].tf.tf_regs.reg_eax = 0;
-		cur_task->tf.tf_regs.reg_eax = pid;
+		thiscpu->cpu_task->tf.tf_regs.reg_eax = pid;
 		//tasks[pid].task_id = pid;		
 	//		cur_task->tf.tf_regs.reg_eax = pid;
 	//	tasks[pid].task_id =  cur_task->task_id;
@@ -352,37 +352,24 @@ void task_init()
 //
 void task_init_percpu()
 {
-	
-
 	int i;
 	extern int user_entry();
 	extern int idle_entry();
-
-	/*
- 	* init TSS	 	
- 	* */	
+	
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
 	memset(&(thiscpu->cpu_tss), 0, sizeof(tss));
 	thiscpu->cpu_tss.ts_esp0 = (uintptr_t)percpu_kstacks[thiscpu->cpu_id] + KSTKSIZE;
-	thiscpu->cpu_tss.ts_ss0 = GD_KD;	
+	thiscpu->cpu_tss.ts_ss0 = GD_KD;
 
 	// fs and gs stay in user data segment
 	thiscpu->cpu_tss.ts_fs = GD_UD | 0x03;
 	thiscpu->cpu_tss.ts_gs = GD_UD | 0x03;
 
 	/* Setup TSS in GDT */
-	gdt[((GD_TSS0 >> 3)+thiscpu->cpu_id)] = SEG16(STS_T32A, (uint32_t)(&(thiscpu->cpu_tss)), sizeof(struct tss_struct), 0);
-	gdt[((GD_TSS0 >> 3)+thiscpu->cpu_id)].sd_s = 0;
+	gdt[GD_TSS0 >> 3+cpunum()] = SEG16(STS_T32A, (uint32_t)(&thiscpu->cpu_tss), sizeof(struct tss_struct), 0);
+	gdt[GD_TSS0 >> 3+cpunum()].sd_s = 0;
 
-	/*
-	 * init cpuRunqueue and idle task 
- 	 * */
-	for(i=0;i<NR_TASKS;i++){
-		memset(&(thiscpu->cpu_rq.list[i]), 0, sizeof(Task));
-		thiscpu->cpu_rq.list[i].state=TASK_FREE;
-	}
-	
 	/* Setup first task */
 	i = task_create();
 	thiscpu->cpu_task = &(tasks[i]);
@@ -392,22 +379,19 @@ void task_init_percpu()
 	setupvm(thiscpu->cpu_task->pgdir, (uint32_t)UDATA_start, UDATA_SZ);
 	setupvm(thiscpu->cpu_task->pgdir, (uint32_t)UBSS_start, UBSS_SZ);
 	setupvm(thiscpu->cpu_task->pgdir, (uint32_t)URODATA_start, URODATA_SZ);
-
-	printk("cpunum:%d\n",cpunum());
-
-	if(cpunum()==0)
-		thiscpu->cpu_task->tf.tf_eip = (uint32_t)user_entry;
-	else
-		thiscpu->cpu_task->tf.tf_eip = (uint32_t)idle_entry;
 	
-	/*init registers*/
+	thiscpu->cpu_task->tf.tf_eip = (uint32_t)user_entry;
+	if(cpunum()) 
+	thiscpu->cpu_task->tf.tf_eip = (uint32_t)idle_entry;
 	/* Load GDT&LDT */
 	lgdt(&gdt_pd);
+
+
 	lldt(0);
+
 	// Load the TSS selector 
-	ltr(GD_TSS0+thiscpu->cpu_id*sizeof(struct Segdesc));
-	
-	thiscpu->cpu_rq.index = i;
-	thiscpu->cpu_rq.list[0] = *thiscpu->cpu_task;
+	ltr(GD_TSS0+cpunum()*sizeof(struct Segdesc));
+
 	thiscpu->cpu_task->state = TASK_RUNNING;
+		
 }
