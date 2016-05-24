@@ -41,6 +41,51 @@
 //    (do not schedule idle task if there are still another process can run)	
 //
 void sched_yield(void)
+
+{
+	extern Task tasks[];
+	extern Task *cur_task;
+	
+	int i;
+	int next_i =0;
+	
+//	printk("sched. cur_task:%d\n",cur_task->task_id);		
+	i = (thiscpu->cpu_task->task_id+1)% NR_TASKS;
+	for (; next_i < NR_TASKS; next_i++)
+	{
+		if(tasks[i].state == TASK_RUNNABLE)
+		{
+			if(thiscpu->cpu_task->state == TASK_RUNNING)
+			{
+				thiscpu->cpu_task->state = TASK_RUNNABLE;
+				thiscpu->cpu_task->remind_ticks = TIME_QUANT;
+				thiscpu->cpu_task = &tasks[i];
+				tasks[i].state = TASK_RUNNING;
+				break;	
+			}else if (thiscpu->cpu_task -> state == TASK_SLEEP)
+			{
+				thiscpu->cpu_task = &tasks[i];
+				tasks[i].state= TASK_RUNNING;
+				break;
+			}else if (thiscpu->cpu_task->state == TASK_STOP)
+			{
+				thiscpu->cpu_task = &tasks[i];
+				tasks[i].state = TASK_RUNNING;
+				break;
+			}
+		}else if (tasks[i].state == TASK_RUNNING)
+		{
+			thiscpu->cpu_task = &tasks[i];
+			tasks[i].remind_ticks = TIME_QUANT;
+		}
+		i = (i+1)% NR_TASKS;
+	}
+	lcr3(PADDR(thiscpu->cpu_task->pgdir));
+	ctx_switch(thiscpu->cpu_task);
+		
+}
+
+/*
 {
 	extern Task tasks[];
 	extern Task *cur_task;
@@ -82,5 +127,5 @@ void sched_yield(void)
 	lcr3(PADDR(cur_task->pgdir));
 	ctx_switch(cur_task);
 		
-	}
-
+}
+*/
