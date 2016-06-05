@@ -87,7 +87,7 @@ boot_aps(void)
 	code = KADDR(MPENTRY_PADDR);
 	memmove(code, mpentry_start, mpentry_end - mpentry_start);
 	//2.
-	uint32_t n;
+/*	uint32_t n;
 	for(n=0;n<ncpu;n++){
 		mpentry_kstack = percpu_kstacks[n]+KSTKSIZE;
 		lapic_startap(n,PADDR(code));
@@ -95,7 +95,7 @@ boot_aps(void)
 			;
 	
 	}
-	/*
+*/	
 	for(c = cpus; c < cpus+ncpu; c++){
 		if(c == cpus+cpunum())
 			continue;
@@ -106,7 +106,7 @@ boot_aps(void)
 			;
 
 	}
-	*/
+	
 
 	
 }
@@ -183,16 +183,12 @@ mp_main(void)
 	
 	// Your code here:
 	lapic_init();
-	trap_init();
 	task_init_percpu();
-
 	// TODO: Lab6
 	// Now that we have finished some basic setup, it's time to tell
 	// boot_aps() we're up ( using xchg )
 	// Your code here:
-//for(;;);	
-	xchg(&thiscpu->cpu_status, CPU_STARTED);
-	//for(;;);
+	xchg(&(thiscpu->cpu_status), CPU_STARTED);
 //	sched_yield();	
 
 	/* Enable interrupt */
@@ -208,7 +204,6 @@ mp_main(void)
 			"pushl %2\n\t" \
 			"pushl %3\n\t" \
 			"iret\n" \
-			:: "m" (thiscpu->cpu_task->tf.tf_esp), "i" (GD_UD | 0x03), "i" (GD_UT | 0x03), "m" (thiscpu->cpu_task->tf.tf_eip)
-			:"ax");
+			:: "m" (thiscpu->cpu_task->tf.tf_esp), "i" (GD_UD | 0x03), "i" (GD_UT | 0x03), "m" (thiscpu->cpu_task->tf.tf_eip)			:"ax");
 
 }

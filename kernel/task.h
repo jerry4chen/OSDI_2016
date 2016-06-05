@@ -3,6 +3,7 @@
 
 #include <inc/trap.h>
 #include <kernel/mem.h>
+#include <kernel/spinlock.h>
 #define NR_TASKS	64	
 #define TIME_QUANT	100
 
@@ -42,9 +43,20 @@ typedef struct
 typedef struct
 {
 	// versoin1 by jerry
-	int index; 
-	Task list[NR_TASKS];
-	
+/*	int index; 
+	int number;
+	int  list[NR_TASKS];
+	Task tasklist[NR_TASKS];
+	*/
+	int index;
+	int head;
+	int tail;
+	int count; // how many tasks
+	int idle_pid; // if no tasks to do change to this index.
+	int queue[NR_TASKS];
+	struct spinlock rqlock;
+
+
 } Runqueue;
 
 

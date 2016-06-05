@@ -18,6 +18,9 @@ struct spinlock {
 	                       // that locked the lock.
 #endif
 };
+static struct spinlock page_lock;
+static struct spinlock console_lock;
+static struct spinlock task_lock;
 
 void __spin_initlock(struct spinlock *lk, char *name);
 void spin_lock(struct spinlock *lk);

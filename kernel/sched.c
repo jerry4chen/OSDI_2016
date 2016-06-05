@@ -41,91 +41,69 @@
 //    (do not schedule idle task if there are still another process can run)	
 //
 void sched_yield(void)
-
 {
 	extern Task tasks[];
-	extern Task *cur_task;
+	int i = (thiscpu->cpu_rq.index + 1) % NR_TASKS;
+	int idle_index = -1;
 	
-	int i;
-	int next_i =0;
-	
-//	printk("sched. cur_task:%d\n",cur_task->task_id);		
-	i = (thiscpu->cpu_task->task_id+1)% NR_TASKS;
-	for (; next_i < NR_TASKS; next_i++)
+	if(thiscpu->cpu_task->state == TASK_RUNNING)
 	{
-		if(tasks[i].state == TASK_RUNNABLE)
-		{
-			if(thiscpu->cpu_task->state == TASK_RUNNING)
-			{
-				thiscpu->cpu_task->state = TASK_RUNNABLE;
-				thiscpu->cpu_task->remind_ticks = TIME_QUANT;
-				thiscpu->cpu_task = &tasks[i];
-				tasks[i].state = TASK_RUNNING;
-				break;	
-			}else if (thiscpu->cpu_task -> state == TASK_SLEEP)
-			{
-				thiscpu->cpu_task = &tasks[i];
-				tasks[i].state= TASK_RUNNING;
-				break;
-			}else if (thiscpu->cpu_task->state == TASK_STOP)
-			{
-				thiscpu->cpu_task = &tasks[i];
-				tasks[i].state = TASK_RUNNING;
-				break;
-			}
-		}else if (tasks[i].state == TASK_RUNNING)
-		{
-			thiscpu->cpu_task = &tasks[i];
-			tasks[i].remind_ticks = TIME_QUANT;
-		}
-		i = (i+1)% NR_TASKS;
+		thiscpu->cpu_task->state = TASK_RUNNABLE;
+		thiscpu->cpu_task->remind_ticks = TIME_QUANT;
 	}
+
+	for(; i != thiscpu->cpu_rq.index; i = (i+1) % NR_TASKS)
+	{
+		//printk("sched\n");
+		if(i == thiscpu->cpu_rq.tail)
+		{
+			i = thiscpu->cpu_rq.head;
+			if(i == thiscpu->cpu_rq.index)
+				break;
+		}
+
+		if(thiscpu->cpu_rq.queue[i] == thiscpu->cpu_rq.idle_pid)
+		{	
+			idle_index = i;
+			continue;
+		}
+
+		if(tasks[thiscpu->cpu_rq.queue[i]].state == TASK_RUNNABLE)
+		{
+			thiscpu->cpu_task = &(tasks[thiscpu->cpu_rq.queue[i]]);
+			break;
+		}
+	}
+	//printk("%d idle_index %d\n", cpunum(), idle_index);
+	/*
+
+	if(i == thiscpu->cpu_task->task_id && thiscpu->cpu_task->state == TASK_RUNNABLE)
+	{
+		thiscpu->cpu_task = &(tasks[i]);
+	}
+	*/
+	if(i == thiscpu->cpu_rq.index )
+	{	
+		if(tasks[thiscpu->cpu_rq.queue[i]].state == TASK_RUNNABLE)
+			thiscpu->cpu_task = &(tasks[thiscpu->cpu_rq.queue[i]]);
+		else
+		{
+			if(idle_index == -1)
+				panic("No idle_index\n");
+			thiscpu->cpu_task = &(tasks[thiscpu->cpu_rq.idle_pid]);
+			i = idle_index;
+		}
+	}
+
+	
+	if(thiscpu->cpu_task->state != TASK_RUNNABLE)
+		panic("CPU:%d sched_yield wrong\n",cpunum());
+	
+	thiscpu->cpu_rq.index = i;	
+	thiscpu->cpu_task->state = TASK_RUNNING;
+	//print_trapframe(&(cur_task->tf));
+	
+	//printk("%d switch to %d\n", cpunum(), thiscpu->cpu_task->task_id);
 	lcr3(PADDR(thiscpu->cpu_task->pgdir));
 	ctx_switch(thiscpu->cpu_task);
-		
 }
-
-/*
-{
-	extern Task tasks[];
-	extern Task *cur_task;
-	
-	int i;
-	int next_i =0;
-	
-//	printk("sched. cur_task:%d\n",cur_task->task_id);		
-	i = (cur_task->task_id+1)% NR_TASKS;
-	for (; next_i < NR_TASKS; next_i++)
-	{
-		if(tasks[i].state == TASK_RUNNABLE)
-		{
-			if(cur_task->state == TASK_RUNNING)
-			{
-				cur_task->state = TASK_RUNNABLE;
-				cur_task->remind_ticks = TIME_QUANT;
-				cur_task = &tasks[i];
-				tasks[i].state = TASK_RUNNING;
-				break;	
-			}else if (cur_task -> state == TASK_SLEEP)
-			{
-				cur_task = &tasks[i];
-				tasks[i].state= TASK_RUNNING;
-				break;
-			}else if (cur_task->state == TASK_STOP)
-			{
-				cur_task = &tasks[i];
-				tasks[i].state = TASK_RUNNING;
-				break;
-			}
-		}else if (tasks[i].state == TASK_RUNNING)
-		{
-			cur_task = &tasks[i];
-			tasks[i].remind_ticks = TIME_QUANT;
-		}
-		i = (i+1)% NR_TASKS;
-	}
-	lcr3(PADDR(cur_task->pgdir));
-	ctx_switch(cur_task);
-		
-}
-*/

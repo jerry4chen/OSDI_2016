@@ -2,6 +2,7 @@
 #include <inc/x86.h>
 #include <inc/string.h>
 #include <inc/stdio.h>
+#include <kernel/spinlock.h>
 
 /* These define our textpointer, our background and foreground
 *  colors (attributes), and x and y cursor coordinates */
@@ -17,7 +18,8 @@ void scroll(void)
     /* A blank is defined as a space... we need to give it
     *  backcolor too */
     blank = 0x0 | (attrib << 8);
-
+    
+    spin_lock(&console_lock);
     /* Row 25 is the end, this means we need to scroll up */
     if(csr_y >= 25)
     {
@@ -31,6 +33,8 @@ void scroll(void)
         memset (textmemptr + (25 - temp) * 80, blank, 80 * 2);
         csr_y = 25 - 1;
     }
+    
+    spin_unlock(&console_lock);
 }
 
 /* Updates the hardware cursor: the little blinking line
@@ -67,6 +71,7 @@ void sys_cls()
     *  represent a space with color */
     blank = 0x0 | (attrib << 8);
 
+    spin_lock(&console_lock);
     /* Sets the entire screen to spaces in our current
     *  color */
     for(i = 0; i < 25; i++)
@@ -76,6 +81,7 @@ void sys_cls()
     *  hardware cursor */
     csr_x = 0;
     csr_y = 0;
+    spin_unlock(&console_lock);
     move_csr();
 }
 
@@ -86,6 +92,7 @@ void k_putch(unsigned char c)
     unsigned short att = attrib << 8;
 
     /* Handle a backspace, by moving the cursor back one space */
+    spin_lock(&console_lock);
     if(c == 0x08)
     {
         if(csr_x != 0) {
@@ -132,6 +139,7 @@ void k_putch(unsigned char c)
         csr_x = 0;
         csr_y++;
     }
+    spin_unlock(&console_lock);
 
     /* Scroll the screen if needed, and finally move the cursor */
     scroll();
@@ -152,7 +160,9 @@ void k_puts(unsigned char *text)
 /* Sets the forecolor and backcolor that we will use */
 void sys_settextcolor(unsigned char forecolor, unsigned char backcolor)
 {
+    spin_lock(&console_lock);
     attrib = (backcolor << 4) | (forecolor & 0x0F);
+    spin_unlock(&console_lock);
 }
 
 /* Sets our text-mode VGA pointer, then clears the screen for us */

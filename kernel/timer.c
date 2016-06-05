@@ -1,4 +1,4 @@
-
+/* Reference: http://www.osdever.net/bkerndev/Docs/pit.htm */
 #include <kernel/trap.h>
 #include <kernel/picirq.h>
 #include <kernel/task.h>
@@ -35,8 +35,7 @@ void timer_handler(struct Trapframe *tf)
 
   extern Task *cur_task;
 
-//  if (cur_task != NULL)
-  if(thiscpu->cpu_task!=NULL)
+  if (thiscpu->cpu_task != NULL)
   {
   /* TODO: Lab 5
    * 1. Maintain the status of slept tasks
@@ -48,28 +47,43 @@ void timer_handler(struct Trapframe *tf)
    * 4. sched_yield() if the time is up for current task
    *
    */
-
-	for (i=0;i<NR_TASKS;i++){
-		switch(tasks[i].state){
-			case TASK_SLEEP:
+   /*
+	for (i = 0 ; i < NR_TASKS; i++)
+	{
+		if(tasks[i].state == TASK_RUNNING)
 			tasks[i].remind_ticks--;
-			if(tasks[i].remind_ticks <=0){
+		else if(tasks[i].state == TASK_SLEEP)
+		{
+			tasks[i].remind_ticks--;
+			if(tasks[i].remind_ticks <= 0)
+			{
 				tasks[i].state = TASK_RUNNABLE;
 				tasks[i].remind_ticks = TIME_QUANT;
 			}
-			break;
-			
-			case TASK_RUNNING:
-				tasks[i].remind_ticks--;
-				break;
-			default:
-				;
 		}
 	}
-	
-//	if(cur_task->remind_ticks<=0)
-	if(thiscpu->cpu_task->remind_ticks<=0)
-	sched_yield();
+    */
+   	Runqueue *rq = &(thiscpu->cpu_rq);
+	int pid;
+   	for(i = rq->head; i != rq->tail;i = (i+1) % NR_TASKS)
+	{
+		pid = rq->queue[i];
+		if(tasks[pid].state == TASK_RUNNING)
+			tasks[pid].remind_ticks--;
+		else if(tasks[pid].state == TASK_SLEEP)
+		{
+			tasks[pid].remind_ticks--;
+			if(tasks[pid].remind_ticks <= 0)
+			{
+				tasks[pid].state = TASK_RUNNABLE;
+				tasks[pid].remind_ticks = TIME_QUANT;
+			}
+		}
+
+	}
+	lapic_eoi();
+	if(thiscpu->cpu_task->remind_ticks <= 0)
+		sched_yield();
   }
 }
 
@@ -82,7 +96,7 @@ void timer_init()
   set_timer(TIME_HZ);
 
   /* Enable interrupt */
-  irq_setmask_8259A(irq_mask_8259A & ~(1<<IRQ_TIMER));
+//  irq_setmask_8259A(irq_mask_8259A & ~(1<<IRQ_TIMER));
 
   /* Register trap handler */
   extern void TIM_ISR();

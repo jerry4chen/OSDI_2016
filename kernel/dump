@@ -1,0 +1,359 @@
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           Intel 80386
+  Version:                           0x1
+  Entry point address:               0x1018b8
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          139076 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         2
+  Size of section headers:           40 (bytes)
+  Number of section headers:         24
+  Section header string table index: 21
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        f0100000 001000 00597d 00  AX  0   0 16
+  [ 2] .iplt             PROGBITS        f0105980 006980 000000 00  AX  0   0  4
+  [ 3] .rodata           PROGBITS        f0106000 007000 001b37 00   A  0   0 32
+  [ 4] .rel.dyn          REL             f0107b38 008b38 000000 08   A  0   0  4
+  [ 5] .stab             PROGBITS        f0107b38 008b38 000001 0c  WA  6   0  1
+  [ 6] .stabstr          STRTAB          f0107b39 008b39 000001 00  WA  0   0  1
+  [ 7] .data             PROGBITS        f0108000 009000 003070 00  WA  0   0 4096
+  [ 8] .igot.plt         PROGBITS        f010b070 00c070 000000 00  WA  0   0  4
+  [ 9] .bss              NOBITS          f010c000 00c070 04f000 00  WA  0   0 4096
+  [10] .debug_abbrev     PROGBITS        00000000 00c070 002974 00      0   0  1
+  [11] .debug_info       PROGBITS        00000000 00e9e4 00976a 00      0   0  1
+  [12] .debug_line       PROGBITS        00000000 01814e 001d43 00      0   0  1
+  [13] .debug_loc        PROGBITS        00000000 019e91 0028ec 00      0   0  1
+  [14] .debug_pubnames   PROGBITS        00000000 01c77d 000a0d 00      0   0  1
+  [15] .debug_pubtypes   PROGBITS        00000000 01d18a 000c4f 00      0   0  1
+  [16] .debug_aranges    PROGBITS        00000000 01dde0 000360 00      0   0  8
+  [17] .debug_ranges     PROGBITS        00000000 01e140 0003e0 00      0   0  1
+  [18] .debug_str        PROGBITS        00000000 01e520 0012c4 01  MS  0   0  1
+  [19] .comment          PROGBITS        00000000 01f7e4 00002c 01  MS  0   0  1
+  [20] .debug_frame      PROGBITS        00000000 01f810 002648 00      0   0  4
+  [21] .shstrtab         STRTAB          00000000 021e58 0000eb 00      0   0  1
+  [22] .symtab           SYMTAB          00000000 022304 0011d0 10     23 102  4
+  [23] .strtab           STRTAB          00000000 0234d4 0009f9 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings)
+  I (info), L (link order), G (group), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+
+There are no section groups in this file.
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  LOAD           0x001000 0xf0100000 0x00100000 0x0b070 0x5b000 RWE 0x1000
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .text .rodata .stab .stabstr .data .bss 
+   01     
+
+There is no dynamic section in this file.
+
+There are no relocations in this file.
+
+There are no unwind sections in this file.
+
+Symbol table '.symtab' contains 285 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: f0100000     0 SECTION LOCAL  DEFAULT    1 
+     2: f0105980     0 SECTION LOCAL  DEFAULT    2 
+     3: f0106000     0 SECTION LOCAL  DEFAULT    3 
+     4: f0107b38     0 SECTION LOCAL  DEFAULT    4 
+     5: f0107b38     0 SECTION LOCAL  DEFAULT    5 
+     6: f0107b39     0 SECTION LOCAL  DEFAULT    6 
+     7: f0108000     0 SECTION LOCAL  DEFAULT    7 
+     8: f010b070     0 SECTION LOCAL  DEFAULT    8 
+     9: f010c000     0 SECTION LOCAL  DEFAULT    9 
+    10: 00000000     0 SECTION LOCAL  DEFAULT   10 
+    11: 00000000     0 SECTION LOCAL  DEFAULT   11 
+    12: 00000000     0 SECTION LOCAL  DEFAULT   12 
+    13: 00000000     0 SECTION LOCAL  DEFAULT   13 
+    14: 00000000     0 SECTION LOCAL  DEFAULT   14 
+    15: 00000000     0 SECTION LOCAL  DEFAULT   15 
+    16: 00000000     0 SECTION LOCAL  DEFAULT   16 
+    17: 00000000     0 SECTION LOCAL  DEFAULT   17 
+    18: 00000000     0 SECTION LOCAL  DEFAULT   18 
+    19: 00000000     0 SECTION LOCAL  DEFAULT   19 
+    20: 00000000     0 SECTION LOCAL  DEFAULT   20 
+    21: 00000000     0 FILE    LOCAL  DEFAULT  ABS string.c
+    22: 00000000     0 FILE    LOCAL  DEFAULT  ABS printf.c
+    23: f0100438    64 FUNC    LOCAL  DEFAULT    1 putch
+    24: 00000000     0 FILE    LOCAL  DEFAULT  ABS printfmt.c
+    25: f0100500   244 FUNC    LOCAL  DEFAULT    1 printnum
+    26: f01005f4    52 FUNC    LOCAL  DEFAULT    1 getuint
+    27: f0100628    28 FUNC    LOCAL  DEFAULT    1 sprintputch
+    28: f0106160    36 OBJECT  LOCAL  DEFAULT    3 error_string
+    29: 00000000     0 FILE    LOCAL  DEFAULT  ABS readline.c
+    30: f010c000     4 OBJECT  LOCAL  DEFAULT    9 is_tab
+    31: f010c004     4 OBJECT  LOCAL  DEFAULT    9 is_found
+    32: f010c008     4 OBJECT  LOCAL  DEFAULT    9 tab_idx
+    33: f010c020  1024 OBJECT  LOCAL  DEFAULT    9 buf
+    34: 00000000     0 FILE    LOCAL  DEFAULT  ABS console.c
+    35: 00000000     0 FILE    LOCAL  DEFAULT  ABS syscall.c
+    36: 00000000     0 FILE    LOCAL  DEFAULT  ABS shell.c
+    37: 00000000     0 FILE    LOCAL  DEFAULT  ABS main.c
+    38: f01018ef     0 NOTYPE  LOCAL  DEFAULT    1 relocated
+    39: f0101920     0 NOTYPE  LOCAL  DEFAULT    1 kgdtdesc
+    40: f0101905     0 NOTYPE  LOCAL  DEFAULT    1 die
+    41: f0101908     0 NOTYPE  LOCAL  DEFAULT    1 kgdt
+    42: 00000000     0 FILE    LOCAL  DEFAULT  ABS main.c
+    43: f0101928    38 FUNC    LOCAL  DEFAULT    1 _paddr.clone.0
+    44: 00000000     0 FILE    LOCAL  DEFAULT  ABS picirq.c
+    45: f0115000     1 OBJECT  LOCAL  DEFAULT    9 didinit
+    46: 00000000     0 FILE    LOCAL  DEFAULT  ABS kbd.c
+    47: f0101c14   202 FUNC    LOCAL  DEFAULT    1 kbd_proc_data
+    48: f0106584   256 OBJECT  LOCAL  DEFAULT    3 shiftcode
+    49: f011520c     4 OBJECT  LOCAL  DEFAULT    9 shift.1183
+    50: f0106684   256 OBJECT  LOCAL  DEFAULT    3 togglecode
+    51: f0106784    16 OBJECT  LOCAL  DEFAULT    3 charcode
+    52: f0115004   520 OBJECT  LOCAL  DEFAULT    9 cons
+    53: f010804c   256 OBJECT  LOCAL  DEFAULT    7 normalmap
+    54: f010814c   256 OBJECT  LOCAL  DEFAULT    7 shiftmap
+    55: f010824c   256 OBJECT  LOCAL  DEFAULT    7 ctlmap
+    56: 00000000     0 FILE    LOCAL  DEFAULT  ABS screen.c
+    57: f0115218    52 OBJECT  LOCAL  DEFAULT    9 console_lock
+    58: 00000000     0 FILE    LOCAL  DEFAULT  ABS trap.c
+    59: f0106ad0    80 OBJECT  LOCAL  DEFAULT    3 excnames.1330
+    60: f0115e4c     4 OBJECT  LOCAL  DEFAULT    9 last_tf
+    61: f0102446     0 NOTYPE  LOCAL  DEFAULT    1 _alltraps
+    62: 00000000     0 FILE    LOCAL  DEFAULT  ABS printf.c
+    63: f0102478    26 FUNC    LOCAL  DEFAULT    1 putch
+    64: 00000000     0 FILE    LOCAL  DEFAULT  ABS mem.c
+    65: f01024d4    13 FUNC    LOCAL  DEFAULT    1 page2pa
+    66: f01024e1    59 FUNC    LOCAL  DEFAULT    1 boot_alloc
+    67: f0115e88     4 OBJECT  LOCAL  DEFAULT    9 nextfree
+    68: f010251c    41 FUNC    LOCAL  DEFAULT    1 _kaddr
+    69: f0102545    25 FUNC    LOCAL  DEFAULT    1 page2kva
+    70: f010255e    75 FUNC    LOCAL  DEFAULT    1 check_va2pa
+    71: f01025a9    45 FUNC    LOCAL  DEFAULT    1 pa2page
+    72: f01025d6   561 FUNC    LOCAL  DEFAULT    1 check_page_free_list
+    73: f0115e84     4 OBJECT  LOCAL  DEFAULT    9 page_free_list
+    74: f0102807    35 FUNC    LOCAL  DEFAULT    1 nvram_read
+    75: f010282a    38 FUNC    LOCAL  DEFAULT    1 _paddr.clone.0
+    76: f0115e50    52 OBJECT  LOCAL  DEFAULT    9 page_lock
+    77: f0102a68   102 FUNC    LOCAL  DEFAULT    1 boot_map_region
+    78: f0108358     4 OBJECT  LOCAL  DEFAULT    7 base.1528
+    79: f0115e8c     4 OBJECT  LOCAL  DEFAULT    9 npages_basemem
+    80: 00000000     0 FILE    LOCAL  DEFAULT  ABS entrypgdir.c
+    81: 00000000     0 FILE    LOCAL  DEFAULT  ABS assert.c
+    82: 00000000     0 FILE    LOCAL  DEFAULT  ABS kclock.c
+    83: 00000000     0 FILE    LOCAL  DEFAULT  ABS timer.c
+    84: f0115e90     4 OBJECT  LOCAL  DEFAULT    9 jiffies
+    85: 00000000     0 FILE    LOCAL  DEFAULT  ABS task.c
+    86: f0115e98    52 OBJECT  LOCAL  DEFAULT    9 task_lock
+    87: 00000000     0 FILE    LOCAL  DEFAULT  ABS syscall.c
+    88: f0104fcd    71 FUNC    LOCAL  DEFAULT    1 syscall_handler
+    89: 00000000     0 FILE    LOCAL  DEFAULT  ABS sched.c
+    90: 00000000     0 FILE    LOCAL  DEFAULT  ABS spinlock.c
+    91: 00000000     0 FILE    LOCAL  DEFAULT  ABS lapic.c
+    92: f01053ec    15 FUNC    LOCAL  DEFAULT    1 lapicw
+    93: 00000008     0 NOTYPE  LOCAL  DEFAULT  ABS PROT_MODE_CSEG
+    94: 00000010     0 NOTYPE  LOCAL  DEFAULT  ABS PROT_MODE_DSEG
+    95: f01056a8     0 NOTYPE  LOCAL  DEFAULT    1 gdtdesc
+    96: f0105654     0 NOTYPE  LOCAL  DEFAULT    1 start32
+    97: f010568b     0 NOTYPE  LOCAL  DEFAULT    1 spin
+    98: f0105690     0 NOTYPE  LOCAL  DEFAULT    1 gdt
+    99: 00000000     0 FILE    LOCAL  DEFAULT  ABS mpconfig.c
+   100: f01056b0    43 FUNC    LOCAL  DEFAULT    1 _kaddr.clone.0
+   101: f01056db    92 FUNC    LOCAL  DEFAULT    1 mpsearch1
+   102: f01018b8     0 NOTYPE  GLOBAL DEFAULT    1 entry
+   103: f010003e    30 FUNC    GLOBAL DEFAULT    1 strcpy
+   104: f0101cde    54 FUNC    GLOBAL DEFAULT    1 kbd_intr
+   105: f0104bcf   621 FUNC    GLOBAL DEFAULT    1 task_init_percpu
+   106: f0102bac    55 FUNC    GLOBAL DEFAULT    1 ptable_remove
+   107: f0104498    75 FUNC    GLOBAL DEFAULT    1 _panic
+   108: f0102b51    91 FUNC    GLOBAL DEFAULT    1 page_insert
+   109: f0107b37     0 NOTYPE  GLOBAL DEFAULT  ABS rdata_end
+   110: f0104605    34 FUNC    GLOBAL DEFAULT    1 set_timer
+   111: f0101554    47 FUNC    GLOBAL DEFAULT    1 user_entry
+   112: f0101d40    60 FUNC    GLOBAL DEFAULT    1 kbd_init
+   113: f010243a     0 FUNC    GLOBAL DEFAULT    1 STACK_ISR
+   114: f010022e   123 FUNC    GLOBAL DEFAULT    1 memmove
+   115: f010127c    82 FUNC    GLOBAL DEFAULT    1 mem_stat
+   116: f0100b35    43 FUNC    GLOBAL DEFAULT    1 snprintf
+   117: f01020ac   361 FUNC    GLOBAL DEFAULT    1 print_trapframe
+   118: f010066f  1125 FUNC    GLOBAL DEFAULT    1 vprintfmt
+   119: f0101d14    44 FUNC    GLOBAL DEFAULT    1 cons_getc
+   120: f01049be   529 FUNC    GLOBAL DEFAULT    1 sys_fork
+   121: f0105634     0 NOTYPE  GLOBAL DEFAULT    1 mpentry_start
+   122: f011a000     4 OBJECT  GLOBAL DEFAULT    9 ismp
+   123: f0101096    49 FUNC    GLOBAL DEFAULT    1 get_num_free_page
+   124: f0102ace    59 FUNC    GLOBAL DEFAULT    1 page_lookup
+   125: f010553e    22 FUNC    GLOBAL DEFAULT    1 lapic_eoi
+   126: f011871c  5632 OBJECT  GLOBAL DEFAULT    9 tasks
+   127: f01052bc    25 FUNC    GLOBAL DEFAULT    1 __spin_initlock
+   128: f0108350     6 OBJECT  GLOBAL DEFAULT    7 idt_pd
+   129: f01004d7    27 FUNC    GLOBAL DEFAULT    1 cprintf
+   130: f01028ef   115 FUNC    GLOBAL DEFAULT    1 page_alloc
+   131: f0119d2c     4 OBJECT  GLOBAL DEFAULT    9 lapicaddr
+   132: f0100ffe    49 FUNC    GLOBAL DEFAULT    1 getpid
+   133: f0119d1c     4 OBJECT  GLOBAL DEFAULT    9 UBSS_SZ
+   134: f0104485     6 FUNC    GLOBAL DEFAULT    1 sys_get_num_free_page
+   135: f01022a0   180 FUNC    GLOBAL DEFAULT    1 default_trap_handler
+   136: f0106188     0 NOTYPE  GLOBAL DEFAULT    3 URODATA_end
+   137: f0104540   197 FUNC    GLOBAL DEFAULT    1 timer_handler
+   138: f0108048     2 OBJECT  GLOBAL DEFAULT    7 irq_mask_8259A
+   139: f0100f08    49 FUNC    GLOBAL DEFAULT    1 getc
+   140: f010435e   295 FUNC    GLOBAL DEFAULT    1 setupkvm
+   141: f0101383   463 FUNC    GLOBAL DEFAULT    1 shell
+   142: f01002a9    35 FUNC    GLOBAL DEFAULT    1 memcpy
+   143: f0115210     4 OBJECT  GLOBAL DEFAULT    9 csr_x
+   144: f0119d20     4 OBJECT  GLOBAL DEFAULT    9 URODATA_SZ
+   145: f0100b60   883 FUNC    GLOBAL DEFAULT    1 readline
+   146: f0100f6a    50 FUNC    GLOBAL DEFAULT    1 puts
+   147: f010a000  4096 OBJECT  GLOBAL DEFAULT    7 entry_pgtable
+   148: f0102be3    34 FUNC    GLOBAL DEFAULT    1 pgdir_remove
+   149: f01053fb    19 FUNC    GLOBAL DEFAULT    1 cpunum
+   150: f010b000   104 OBJECT  GLOBAL DEFAULT    7 gdt
+   151: f0101d7c     5 FUNC    GLOBAL DEFAULT    1 k_getc
+   152: f01010f8    51 FUNC    GLOBAL DEFAULT    1 sleep
+   153: f010540e   304 FUNC    GLOBAL DEFAULT    1 lapic_init
+   154: f0100ad4    97 FUNC    GLOBAL DEFAULT    1 vsnprintf
+   155: f0102418     0 FUNC    GLOBAL DEFAULT    1 Default_ISR
+   156: f01047ee   464 FUNC    GLOBAL DEFAULT    1 sys_kill
+   157: f0102422     0 FUNC    GLOBAL DEFAULT    1 KBD_Input
+   158: f0100000     0 NOTYPE  GLOBAL DEFAULT  ABS UTEXT_start
+   159: f010246e     0 NOTYPE  GLOBAL DEFAULT    1 trapret
+   160: f010131a   105 FUNC    GLOBAL DEFAULT    1 forktest
+   161: f0101720   325 FUNC    GLOBAL HIDDEN     1 __umoddi3
+   162: f0102215   105 FUNC    GLOBAL DEFAULT    1 register_handler
+   163: f01012ce    76 FUNC    GLOBAL DEFAULT    1 task_job
+   164: f010448b    12 FUNC    GLOBAL DEFAULT    1 sys_get_num_used_page
+   165: f0104627     6 FUNC    GLOBAL DEFAULT    1 sys_get_ticks
+   166: f01015a0   260 FUNC    GLOBAL HIDDEN     1 __udivdi3
+   167: f01018b8     0 NOTYPE  GLOBAL DEFAULT    1 UTEXT_end
+   168: f0108000     0 NOTYPE  GLOBAL DEFAULT    7 UDATA_start
+   169: f0100346   241 FUNC    GLOBAL DEFAULT    1 strtol
+   170: f0115ee0     4 OBJECT  GLOBAL DEFAULT    9 hist_curr
+   171: f0100019    37 FUNC    GLOBAL DEFAULT    1 strnlen
+   172: f0102c66  5764 FUNC    GLOBAL DEFAULT    1 mem_init
+   173: f0100000     0 NOTYPE  GLOBAL DEFAULT  ABS stext
+   174: f010194e   385 FUNC    GLOBAL DEFAULT    1 kernel_main
+   175: f010462d    60 FUNC    GLOBAL DEFAULT    1 timer_init
+   176: f0101fbf    61 FUNC    GLOBAL DEFAULT    1 sys_settextcolor
+   177: f010005c    42 FUNC    GLOBAL DEFAULT    1 strcat
+   178: f0106184     4 OBJECT  GLOBAL DEFAULT    3 NCOMMANDS
+   179: f0118718     4 OBJECT  GLOBAL DEFAULT    9 panicstr
+   180: f015b000     0 NOTYPE  GLOBAL DEFAULT  ABS end
+   181: f01044e3    56 FUNC    GLOBAL DEFAULT    1 _warn
+   182: f0101e15    42 FUNC    GLOBAL DEFAULT    1 move_csr
+   183: f0118700     4 OBJECT  GLOBAL DEFAULT    9 mpentry_kstack
+   184: f0104edf   238 FUNC    GLOBAL DEFAULT    1 do_syscall
+   185: f010227e    34 FUNC    GLOBAL DEFAULT    1 env_pop_tf
+   186: f0106000     0 NOTYPE  GLOBAL DEFAULT  ABS URODATA_start
+   187: f01001a9    38 FUNC    GLOBAL DEFAULT    1 strfind
+   188: f010597d     0 NOTYPE  GLOBAL DEFAULT  ABS etext
+   189: f0115ee4     4 OBJECT  GLOBAL DEFAULT    9 hist_head
+   190: 001018b8     0 NOTYPE  GLOBAL DEFAULT    1 _start
+   191: f0115ee8     4 OBJECT  GLOBAL DEFAULT    9 hist_tail
+   192: f0102492    42 FUNC    GLOBAL DEFAULT    1 vprintk
+   193: f01000b3    71 FUNC    GLOBAL DEFAULT    1 strlcpy
+   194: f0102c0d    89 FUNC    GLOBAL DEFAULT    1 mmio_map_region
+   195: f0100127    74 FUNC    GLOBAL DEFAULT    1 strncmp
+   196: f0102428     0 FUNC    GLOBAL DEFAULT    1 TIM_ISR
+   197: f0101205    86 FUNC    GLOBAL DEFAULT    1 chgcolor
+   198: f010834c     4 OBJECT  GLOBAL DEFAULT    7 attrib
+   199: f0100086    45 FUNC    GLOBAL DEFAULT    1 strncpy
+   200: f010452d    18 FUNC    GLOBAL DEFAULT    1 mc146818_write
+   201: f010112b    55 FUNC    GLOBAL DEFAULT    1 settextcolor
+   202: f015b000     0 NOTYPE  GLOBAL DEFAULT  ABS UBSS_end
+   203: f010202a   130 FUNC    GLOBAL DEFAULT    1 print_regs
+   204: f010451c    17 FUNC    GLOBAL DEFAULT    1 mc146818_read
+   205: f010b070     0 NOTYPE  GLOBAL DEFAULT  ABS bss_start
+   206: f0101b74    36 FUNC    GLOBAL DEFAULT    1 irq_setmask_8259A
+   207: f0101ffc    21 FUNC    GLOBAL DEFAULT    1 init_video
+   208: f0101d84   145 FUNC    GLOBAL DEFAULT    1 scroll
+   209: f0119d24     4 OBJECT  GLOBAL DEFAULT    9 UDATA_SZ
+   210: f01002cc    84 FUNC    GLOBAL DEFAULT    1 memcmp
+   211: f010466c   386 FUNC    GLOBAL DEFAULT    1 task_create
+   212: f0100fcd    49 FUNC    GLOBAL DEFAULT    1 fork
+   213: f01024bc    23 FUNC    GLOBAL DEFAULT    1 printk
+   214: f010c000     0 NOTYPE  GLOBAL DEFAULT    9 UBSS_start
+   215: f011a004  3552 OBJECT  GLOBAL DEFAULT    9 cpus
+   216: f01011ab    90 FUNC    GLOBAL DEFAULT    1 spinlocktest
+   217: f0115a4c  1024 OBJECT  GLOBAL DEFAULT    9 trap_hnd
+   218: f0105014    28 FUNC    GLOBAL DEFAULT    1 syscall_init
+   219: f0119d30     4 OBJECT  GLOBAL DEFAULT    9 lapic
+   220: f011ade4     4 OBJECT  GLOBAL DEFAULT    9 bootcpu
+   221: f0102014    22 FUNC    GLOBAL DEFAULT    1 page_fault_handler
+   222: f010242e     0 FUNC    GLOBAL DEFAULT    1 SYSCALL
+   223: f0104ed4    11 FUNC    GLOBAL DEFAULT    1 do_getc
+   224: f0100ed4    35 FUNC    GLOBAL DEFAULT    1 cputchar
+   225: f01001cf    95 FUNC    GLOBAL DEFAULT    1 memset
+   226: f0100ef7    16 FUNC    GLOBAL DEFAULT    1 getchar
+   227: f010125b    33 FUNC    GLOBAL DEFAULT    1 print_tick
+   228: f0102b09    72 FUNC    GLOBAL DEFAULT    1 page_remove
+   229: f0100644    43 FUNC    GLOBAL DEFAULT    1 printfmt
+   230: f010b068     6 OBJECT  GLOBAL DEFAULT    7 gdt_pd
+   231: f0102962   125 FUNC    GLOBAL DEFAULT    1 page_free
+   232: f0115214     4 OBJECT  GLOBAL DEFAULT    9 csr_y
+   233: f0108048     0 NOTYPE  GLOBAL DEFAULT    7 UDATA_end
+   234: f01000fa    45 FUNC    GLOBAL DEFAULT    1 strcmp
+   235: f0108000     0 NOTYPE  GLOBAL DEFAULT  ABS data_start
+   236: f011524c  2048 OBJECT  GLOBAL DEFAULT    9 idt
+   237: f0100000     0 NOTYPE  GLOBAL DEFAULT  ABS kernel_load_addr
+   238: f0119d28     4 OBJECT  GLOBAL DEFAULT    9 UTEXT_SZ
+   239: f0101b98   124 FUNC    GLOBAL DEFAULT    1 pic_init
+   240: f0104eac    40 FUNC    GLOBAL DEFAULT    1 do_puts
+   241: f011ade8     4 OBJECT  GLOBAL DEFAULT    9 ncpu
+   242: f0100f9c    49 FUNC    GLOBAL DEFAULT    1 get_ticks
+   243: f0105737   582 FUNC    GLOBAL DEFAULT    1 mp_init
+   244: f010102f    54 FUNC    GLOBAL DEFAULT    1 kill_self
+   245: f010536e   126 FUNC    GLOBAL DEFAULT    1 spin_unlock
+   246: f0118704     4 OBJECT  GLOBAL DEFAULT    9 textmemptr
+   247: f01029df    32 FUNC    GLOBAL DEFAULT    1 page_decref
+   248: f0101acf   163 FUNC    GLOBAL DEFAULT    1 mp_main
+   249: f01042ea   116 FUNC    GLOBAL DEFAULT    1 setupvm
+   250: f0115e94     4 OBJECT  GLOBAL DEFAULT    9 cur_task
+   251: f0100478    95 FUNC    GLOBAL DEFAULT    1 vcprintf
+   252: f0101eaf   220 FUNC    GLOBAL DEFAULT    1 k_putch
+   253: f0101f8b    52 FUNC    GLOBAL DEFAULT    1 k_puts
+   254: f01052d5   153 FUNC    GLOBAL DEFAULT    1 spin_lock
+   255: f0102440     0 FUNC    GLOBAL DEFAULT    1 PGFLT
+   256: f010560e    38 FUNC    GLOBAL DEFAULT    1 lapic_ipi
+   257: f0115000     0 NOTYPE  GLOBAL DEFAULT    9 bootstacktop
+   258: f0115f00 10240 OBJECT  GLOBAL DEFAULT    9 hist
+   259: f0105554   186 FUNC    GLOBAL DEFAULT    1 lapic_startap
+   260: f0109000  4096 OBJECT  GLOBAL DEFAULT    7 entry_pgdir
+   261: f0108000    72 OBJECT  GLOBAL DEFAULT    7 commands
+   262: f010d000     0 NOTYPE  GLOBAL DEFAULT    9 bootstack
+   263: f0101065    49 FUNC    GLOBAL DEFAULT    1 cls
+   264: f0102850   159 FUNC    GLOBAL DEFAULT    1 page_init
+   265: f0104e3c   110 FUNC    GLOBAL DEFAULT    1 task_init
+   266: f0100000    25 FUNC    GLOBAL DEFAULT    1 strlen
+   267: f0118708     4 OBJECT  GLOBAL DEFAULT    9 npages
+   268: f0101e3f   112 FUNC    GLOBAL DEFAULT    1 sys_cls
+   269: f01029ff   105 FUNC    GLOBAL DEFAULT    1 pgdir_walk
+   270: f0102354   195 FUNC    GLOBAL DEFAULT    1 trap_init
+   271: f01056ae     0 NOTYPE  GLOBAL DEFAULT    1 mpentry_end
+   272: f0100171    56 FUNC    GLOBAL DEFAULT    1 strchr
+   273: f0101583    15 FUNC    GLOBAL DEFAULT    1 idle_entry
+   274: f011870c     4 OBJECT  GLOBAL DEFAULT    9 kern_pgdir
+   275: f0118710     4 OBJECT  GLOBAL DEFAULT    9 num_free_pages
+   276: f0105030   650 FUNC    GLOBAL DEFAULT    1 sched_yield
+   277: f0102434     0 FUNC    GLOBAL DEFAULT    1 GPFLT
+   278: f0100f39    49 FUNC    GLOBAL DEFAULT    1 getcid
+   279: f0118714     4 OBJECT  GLOBAL DEFAULT    9 pages
+   280: f011b000 0x40000 OBJECT  GLOBAL DEFAULT    9 percpu_kstacks
+   281: f01010c7    49 FUNC    GLOBAL DEFAULT    1 get_num_used_page
+   282: f0100320    38 FUNC    GLOBAL DEFAULT    1 memfind
+   283: f0101170    59 FUNC    GLOBAL DEFAULT    1 mon_help
+   284: f0102c05     8 FUNC    GLOBAL DEFAULT    1 tlb_invalidate
+
+No version information found in this file.
