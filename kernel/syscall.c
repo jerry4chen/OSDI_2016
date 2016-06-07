@@ -4,6 +4,8 @@
 #include <inc/syscall.h>
 #include <inc/stdio.h>
 #include <inc/trap.h>
+#include <kernel/fs/fs.h>
+
 
 extern void sys_settextcolor(unsigned char forecolor, unsigned char backcolor); // kernel/screen.c
 extern void sys_cls(); // kernel/screen.c
@@ -91,6 +93,8 @@ int32_t do_syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, ui
         
         /* TODO: Lab7 file I/O system call */    
         case SYS_open:
+		retVal=sys_open(a1,a2,a3);
+		break;
         case SYS_read:    
         case SYS_write:
         case SYS_close:   

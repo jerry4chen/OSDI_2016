@@ -19,6 +19,13 @@ int sys_open(const char *file, int flags, int mode)
 {
     //We dont care the mode.
 /* TODO */
+	int idx = fd_new();	
+	struct fs_fd* d;
+	d = fd_get(idx);
+	printk("constcharfile:%s\n",file);
+return	file_open(d, file, flags );
+	//int file_open(struct fs_fd* fd, const char *path, int flags)
+	
 }
 
 int sys_close(int fd)

@@ -16,7 +16,7 @@ enum {
     SYS_settextcolor,
     SYS_cls,
     
-    /* I/O syscall for Lab7 */
+    /* I/O syscall for Lab7 11~16 */
     SYS_open,
     SYS_close,
     SYS_read,

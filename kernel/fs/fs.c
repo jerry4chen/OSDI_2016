@@ -78,7 +78,17 @@ int file_write(struct fs_fd* fd, const void *buf, size_t len)
 /* Note: Before call call fat_fs.ops->open() you may copy the path and flags parameters into fd object structure */
 int file_open(struct fs_fd* fd, const char *path, int flags)
 {
-
+	//FRESULT f_open (
+	//FIL* fp,			/* Pointer to the blank file object */
+	//const TCHAR* path,	/* Pointer to the file name */
+	//BYTE mode			/* Access mode and file open mode flags */
+	//)		
+	//fat_fs
+	strncpy(fd->path, path,64);	
+//	fd->path = path;
+	fd->flags = flags;
+	printk("path:%s, and path:%s\n",fd->path,path);
+	return fat_open(fd);
 }
 
 int file_close(struct fs_fd* fd)
