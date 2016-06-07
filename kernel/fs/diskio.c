@@ -19,6 +19,8 @@ DSTATUS disk_initialize (BYTE pdrv)
 {
     //printk("disk_initialize %d\n", pdrv);
     /* TODO */
+	
+    //return disk_initialize();
     return 0;
 }
 

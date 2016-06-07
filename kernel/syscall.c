@@ -113,7 +113,7 @@ static void syscall_handler(struct Trapframe *tf)
 	/* Set system return value */
 	tf->tf_regs.reg_eax = ret;
 
-	}
+	
 }
 
 void syscall_init()
