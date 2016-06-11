@@ -29,7 +29,7 @@ struct fs_dev fat_fs = {
 int fs_init()
 {
     int res, i;
-    
+    printk("fs_init\n");
     /* Initial fd_tables */
     for (i = 0; i < FS_FD_MAX; i++)
     {
@@ -62,17 +62,26 @@ int fs_init()
 */
 int fs_mount(const char* device_name, const char* path, const void* data)
 {
-    return -STATUS_EIO;
+	
+	int res;
+	//int fat_mount(struct fs_dev *fs, const void* data)
+	if(strcmp(fat_fs.ops->dev_name,device_name)==0){
+		 //fat_fs.ops->mount(fat_fs.data, data); 
+		strcpy(fat_fs.path,path); 
+		return fat_mount(&fat_fs, data); 
+//		return 0;
+	}
+	return -STATUS_EIO;
 } 
 
 int file_read(struct fs_fd* fd, void *buf, size_t len)
 {
-
+	return fat_read(fd, buf, len);
 }
 
 int file_write(struct fs_fd* fd, const void *buf, size_t len)
 {
-
+	return fat_write(fd, buf, len);
 }
 
 /* Note: Before call call fat_fs.ops->open() you may copy the path and flags parameters into fd object structure */
@@ -87,20 +96,21 @@ int file_open(struct fs_fd* fd, const char *path, int flags)
 	strncpy(fd->path, path,64);	
 //	fd->path = path;
 	fd->flags = flags;
-	printk("path:%s, and path:%s\n",fd->path,path);
+	//printk("path:%s, and path:%s\n",fd->path,path);
 	return fat_open(fd);
 }
 
 int file_close(struct fs_fd* fd)
 {
-
+	return fat_close(fd);
 }
 int file_lseek(struct fs_fd* fd, off_t offset)
 {
-
+	return fat_lseek(fd, offset);
 }
 int file_unlink(const char *path)
 {
+	return fat_unlink(path);
 }
 
 

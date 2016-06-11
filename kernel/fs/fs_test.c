@@ -16,7 +16,9 @@ void fs_test()
         /* Create FAT volume with default cluster size */
         res = f_mkfs("/", 0, 0);
         res = f_mount(&fs, "/", 1); //Remount
+//	printk("remount res: %d\n",res);
     }
+
 
     /* Create a file as new */
     res = f_open(&fil, "hello.txt", FA_CREATE_ALWAYS | FA_WRITE);
@@ -26,7 +28,7 @@ void fs_test()
 
     /* Write a message */
     f_write(&fil, "Hello, World!\r\n", 15, &bw);
-
+	printk("bw:%d\n",bw);
     /* Close the file */
     f_close(&fil);
 

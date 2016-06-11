@@ -18,13 +18,19 @@ extern struct fs_dev fat_fs;
 */
 int fat_mount(struct fs_dev *fs, const void* data)
 {
-
+	int res;	
+    //printk("fs->path:%s\n",fs->path);
+	res = f_mount(fs->data, fs->path,1 );
+	return res;
+//FRESULT f_mount (FATFS* fs, const TCHAR* path, BYTE opt);			/* Mount/Unmount a logical drive */
+    //return f_mount(fs, fs->path, fs->data);
+//    return -STATUS_EIO;
 }
 
 /* Note: Just call f_mkfs at root path '/' */
 int fat_mkfs(const char* device_name)
 {
-
+	return f_mkfs('/',0,0);
 }
 
 /* Note: Convert the POSIX's open flag to elmfat's flag.
@@ -34,17 +40,15 @@ int fat_mkfs(const char* device_name)
 */
 int fat_open(struct fs_fd* file)
 {
-	//FRESULT f_open (
-	//FIL* fp,			/* Pointer to the blank file object */
-	//const TCHAR* path,	/* Pointer to the file name */
-	//BYTE mode			/* Access mode and file open mode flags */
-	//)
 	FRESULT ret;
-	FIL* fp;
+	FIL fp;
 	TCHAR* path;
 	BYTE mode;
-	int flag = file->flags;	
-	switch(flag&0x0f){ //check the final 2 bit
+	int flag4= file->flags;
+	int flag3= file->flags;
+	int flag2= file->flags;
+	int flag = 0;	
+	switch(flag3&0x0f){ //check the final 2 bit
 		case O_RDONLY:
 		flag = FA_READ;
 		break;
@@ -59,9 +63,9 @@ int fat_open(struct fs_fd* file)
 	//	panic("ACCMODE\n");
 		break;
 	}
-	switch(flag&0xf00){
+	switch(flag2&0xf00){
 		case O_CREAT:
-		if(flag&0xf000 == O_TRUNC)
+		if(flag4&0xf000 == O_TRUNC)
 			flag |= FA_CREATE_ALWAYS;
 		break;
 		case O_EXCL:
@@ -70,13 +74,10 @@ int fat_open(struct fs_fd* file)
 	
 	}
 	path = file->path;
-	ret=f_open(file, path, mode);
-	printk("ret:%d\n",ret);
+	ret=f_open(file->data, path, flag);
+
+//	printk("fat_open ret:%d\n",ret);
 return ret;
-//	switch(flag&0xf000){
-//
-//	}
-//	if(flag == O_RDONLY)
 //#define O_CREAT			0x0000100
 //#define O_EXCL			0x0000200
 //#define O_TRUNC			0x0001000
@@ -87,20 +88,42 @@ return ret;
 
 int fat_close(struct fs_fd* file)
 {
-
+	
+	return f_close(file->data);
 }
 int fat_read(struct fs_fd* file, void* buf, size_t count)
 {
+	FIL fp;
+	UINT br;
+	f_read(file->data, buf, count, &br);
+	printk("fat_read br:%d\n",br);
 
+//	FRESULT f_read (
+//	FIL* fp, 	/* Pointer to the file object */
+//	void* buff,	/* Pointer to data buffer */
+//	UINT btr,	/* Number of bytes to read */
+//	UINT* br	/* Pointer to number of bytes read */
+//)
 }
 int fat_write(struct fs_fd* file, const void* buf, size_t count)
 {
+//FRESULT f_write (FIL* fp, const void* buff, UINT btw, UINT* bw);	/* Write data to a file */
+	UINT bw;
+	int ret;
+	ret = f_write((FIL*)file->data, buf, count, &bw);
+	if(ret == 0)
+		return bw;
+	printk("fat_write error -> ret:%d , bw:%d\n",ret,bw);
+	return ret;
 }
 int fat_lseek(struct fs_fd* file, off_t offset)
-{
+{	
+	return f_lseek(file->data, offset);
 }
 int fat_unlink(struct fs_fd* file, const char *pathname)
 {
+	return f_unlink(pathname);
+
 }
 
 struct fs_ops elmfat_ops = {
