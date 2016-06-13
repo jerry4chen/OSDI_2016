@@ -44,11 +44,12 @@ int fat_open(struct fs_fd* file)
 	FIL fp;
 	TCHAR* path;
 	BYTE mode;
-	int flag4= file->flags;
-	int flag3= file->flags;
+	int isappend =0;
 	int flag2= file->flags;
 	int flag = 0;	
-	switch(flag3&0x0f){ //check the final 2 bit
+//	printk("flag:%7x, flag&0xf000:%7x\n",flag2,flag2&0xf000);
+	
+	switch(flag2&0x0f){ //check the final 2 bit
 		case O_RDONLY:
 		flag = FA_READ;
 		break;
@@ -65,31 +66,68 @@ int fat_open(struct fs_fd* file)
 	}
 	switch(flag2&0xf00){
 		case O_CREAT:
-//		if(flag4&0xf000 == O_TRUNC)
+		if(flag2& O_TRUNC){
 			flag |= FA_CREATE_ALWAYS;
-		break;
-		case O_EXCL:
-		flag |= FA_CREATE_NEW;
+//			printk("OTRUNC\n");
+		}else{
+		flag|=FA_CREATE_NEW;
+//		printk("OCREAT\n");
+		}
 		break;
 	
-	}
+	}/*
+	switch(flag4&0xf000){
+		case O_TRUNC:
+			flag|=FA_CREATE_ALWAYS;
+		break;
+		case O_APPEND:
+			isappend=1;		
+		break;
+	}*/
 	path = file->path;
-	ret=f_open(file->data, path, flag);
+	ret = f_open(file->data, path, flag);
+//	if(isappend) f_lseek(file->data,f_size(file->pos));
+	switch(ret){
+		case FR_NO_FILE:
+		case FR_NO_PATH:
+			ret = -STATUS_ENOENT;
+			break;
+		case FR_EXIST:
+			ret = -STATUS_EEXIST;
+			break;
+		default:
+			ret = -ret;
 
+	}
 //	printk("fat_open ret:%d\n",ret);
 return ret;
 //#define O_CREAT			0x0000100
 //#define O_EXCL			0x0000200
 //#define O_TRUNC			0x0001000
-//#define O_APPEND		0x0002000
-//#define O_DIRECTORY		0x0200000
+//#define O_APPEND			0x0002000
+//#define O_DIRECTORY			0x0200000
 	
 }
 
 int fat_close(struct fs_fd* file)
 {
-	
-	return f_close(file->data);
+
+		int ret;
+	ret  = f_close((FIL*)file->data);	
+	switch(ret){
+		case FR_OK :
+			return ret;
+		case FR_DISK_ERR:
+			return -STATUS_EIO;
+		case FR_INT_ERR:
+/*TODO*/		return -ret;
+
+		case FR_INVALID_OBJECT:
+			return -STATUS_EINVAL; 	
+		case FR_TIMEOUT:
+			return -ret;	
+	}
+	return ret;
 }
 int fat_read(struct fs_fd* file, void* buf, size_t count)
 {

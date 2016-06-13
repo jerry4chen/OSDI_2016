@@ -46,7 +46,7 @@ DSTATUS disk_initialize (BYTE pdrv)
 	return sta;
 	
   */  
-	if(ide_devices[DISK_ID].Reserved==9){
+	if(ide_devices[DISK_ID].Reserved==0){
 			disk_init();
 			return RES_OK;
 		}else 	return RES_OK;
@@ -121,7 +121,7 @@ DRESULT disk_write (BYTE pdrv, const BYTE* buff, DWORD sector, UINT count)
     BYTE *ptr = buff;
     UINT cur_sector = sector;
     
-    printk("disk_write %d sector %d count %d\n", pdrv, sector, count);
+//    printk("disk_write %d sector %d count %d\n", pdrv, sector, count);
     /* TODO */    
         	//ide_write_sectors(DISK_ID, count, cur_sector, (unsigned int)ptr);
 		//return RES_OK;

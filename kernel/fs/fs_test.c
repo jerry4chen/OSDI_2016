@@ -28,7 +28,7 @@ void fs_test()
 
     /* Write a message */
     f_write(&fil, "Hello, World!\r\n", 15, &bw);
-	printk("bw:%d\n",bw);
+//	printk("bw:%d\n",bw);
     /* Close the file */
     f_close(&fil);
 

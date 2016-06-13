@@ -15,7 +15,7 @@
 */
 
 
-
+extern struct fs_fd fd_table[FS_FD_MAX];
 
 // Below is POSIX like I/O system call 
 int sys_open(const char *file, int flags, int mode)
@@ -27,13 +27,15 @@ int sys_open(const char *file, int flags, int mode)
 	int ret;
 	if(idx != -1){
 			d = fd_get(idx);
+			d->ref_count--;
 			ret = file_open(d, file, flags);
 			if(ret ==0){
-			return idx;
+//			printk("idx:%d, fd->ref_count:%d\n",idx,d->ref_count);
+				return idx;
 			}	
 			else{
-			fd_put(d);
-			return -ret;//file open error;
+				fd_put(d);
+				return ret;//file open error;
 			}	
 	}
 	else {
@@ -48,12 +50,14 @@ int sys_open(const char *file, int flags, int mode)
 int sys_close(int fd)
 {
 /* TODO */
-	
+	if(fd >= FS_FD_MAX)
+		return -STATUS_EINVAL;
  	struct fs_fd* d = fd_get(fd);
-	file_close(d);
+//			printk("sysclose:idx:%d, fd->ref_count:%d\n",fd,d->ref_count);
+	d->ref_count--;
+	int res = file_close(d);
 	fd_put(d);
-	fd_put(d);
-	return 0;
+	return res;
 
 }
 int sys_read(int fd, void *buf, size_t len)
@@ -61,9 +65,12 @@ int sys_read(int fd, void *buf, size_t len)
 /* TODO */
 	int res;
  	struct fs_fd* d;
+	if(fd >= FS_FD_MAX)
+		return -STATUS_EINVAL;
+	
 	d = fd_get(fd);
+//			printk("susread:idx:%d, fd->ref_count:%d\n",fd,d->ref_count);
 	res = file_read(d, buf, len);
-	fd_put(d);
 	fd_put(d);
 	return res;
 }
@@ -72,10 +79,13 @@ int sys_write(int fd, const void *buf, size_t len)
 /* TODO */
 	int res;
  	struct fs_fd* d;
+	if(fd >= FS_FD_MAX)
+		return -STATUS_EINVAL;
 	d = fd_get(fd);
+//			printk("syswriteidx:%d, fd->ref_count:%d\n",fd,d->ref_count);
 	res = file_write(d, buf, len);
 	fd_put(d);
-	fd_put(d);
+//			printk("syswriteidx:%d, fd->ref_count:%d\n",fd,d->ref_count);
 	return res;
 }
 
@@ -85,6 +95,9 @@ off_t sys_lseek(int fd, off_t offset, int whence)
 /* TODO */
 	off_t newoffset;
  	struct fs_fd* d;
+	if(fd >= FS_FD_MAX)
+		return -STATUS_EINVAL;
+	
 	d = fd_get(fd);
 	
 	switch(whence){
@@ -92,7 +105,7 @@ off_t sys_lseek(int fd, off_t offset, int whence)
 		newoffset = offset;
 		break;
 	case SEEK_END:
-		newoffset = d+offset;
+		newoffset = (off_t)(d->pos)+offset;
 		break;
 	}
 	

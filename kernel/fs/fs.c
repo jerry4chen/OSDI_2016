@@ -29,7 +29,7 @@ struct fs_dev fat_fs = {
 int fs_init()
 {
     int res, i;
-    printk("fs_init\n");
+//    printk("fs_init\n");
     /* Initial fd_tables */
     for (i = 0; i < FS_FD_MAX; i++)
     {
@@ -104,6 +104,7 @@ int file_open(struct fs_fd* fd, const char *path, int flags)
 
 int file_close(struct fs_fd* fd)
 {
+//	printk("fileclose\n");
 	return fat_close(fd);
 }
 int file_lseek(struct fs_fd* fd, off_t offset)
