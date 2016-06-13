@@ -291,11 +291,9 @@ int filetest4(int argc, char **argv)
     uassert(ret == STATUS_OK);
     
     fd = open("test4", O_WRONLY | O_CREAT, 0);
-	cprintf("fd = %d\n",fd);
     uassert(fd == -STATUS_EEXIST);
     
     fd = open("test4", O_RDWR | O_CREAT | O_TRUNC, 0);
-	cprintf("fd = %d\n",fd);
     uassert(fd >= STATUS_OK);
     
     ret = write(fd, 0, -1);
@@ -339,15 +337,19 @@ int filetest5(int argc, char **argv)
     uassert(fd >= STATUS_OK);
     
     ret = close(fd);
+	cprintf("ret = %d\n",ret);
     uassert(ret == STATUS_OK);
     
     ret = unlink("test5");
+	cprintf("ret = %d\n",ret);
     uassert(ret == STATUS_OK);
     
     fd = open("test5", O_RDWR, 0);
+	cprintf("fd = %d\n",fd);
     uassert(fd == -STATUS_ENOENT); //file should be removed.
     
     fd = open("hello.txt", O_RDWR | O_APPEND, 0);
+	cprintf("fd = %d\n",fd);
     uassert(fd >= STATUS_OK);
     
     ret = write(fd, buf, 10);

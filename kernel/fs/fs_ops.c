@@ -161,15 +161,22 @@ int fat_write(struct fs_fd* file, const void* buf, size_t count)
 }
 int fat_lseek(struct fs_fd* file, off_t offset)
 {	
-	printk("lseek\n");
+	//printk("lseek\n");
 int res =  f_lseek((FIL*)file->data, offset);
-	printk("f_lseek:%d\n",res);
+	//printk("f_lseek:%d\n",res);
 	return res;
 }
 int fat_unlink(struct fs_fd* file, const char *pathname)
-{
-	return f_unlink(pathname);
+{	
+//	printk("path:%s\n",pathname);
+	int res = f_unlink(pathname);
+	switch(res){
+		case FR_NO_FILE:
+		return -STATUS_ENOENT;
+		default:
+		return res;
 
+	}
 }
 
 struct fs_ops elmfat_ops = {

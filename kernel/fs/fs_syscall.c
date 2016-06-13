@@ -65,9 +65,12 @@ int sys_read(int fd, void *buf, size_t len)
 /* TODO */
 	int res;
  	struct fs_fd* d;
-	if(fd >= FS_FD_MAX)
+	if((int)len<0)
 		return -STATUS_EINVAL;
-	
+	if(fd>= FS_FD_MAX||fd<0)
+		return -STATUS_EBADF;	
+	if(buf == 0)
+		return -STATUS_EINVAL;
 	d = fd_get(fd);
 //			printk("susread:idx:%d, fd->ref_count:%d\n",fd,d->ref_count);
 	res = file_read(d, buf, len);
@@ -79,8 +82,12 @@ int sys_write(int fd, const void *buf, size_t len)
 /* TODO */
 	int res;
  	struct fs_fd* d;
-	if(fd >= FS_FD_MAX)
+	if((fd >= FS_FD_MAX)||(fd<0))
+		return -STATUS_EBADF;
+	if((int)len<0)
 		return -STATUS_EINVAL;
+	
+//	printk("write fd:%d,ref_count:%d,\n",fd,fd_table[fd].ref_count);	
 	d = fd_get(fd);
 //			printk("syswriteidx:%d, fd->ref_count:%d\n",fd,d->ref_count);
 	res = file_write(d, buf, len);
@@ -104,8 +111,11 @@ off_t sys_lseek(int fd, off_t offset, int whence)
 	case SEEK_SET:
 		newoffset = offset;
 		break;
+	case SEEK_CUR:
+		newoffset = (off_t)(d->pos);
+		break;	
 	case SEEK_END:
-		newoffset = (off_t)(d->pos)+offset;
+		newoffset = (size_t)d->size+offset;
 		break;
 	}
 	
