@@ -56,16 +56,16 @@ int fat_open(struct fs_fd* file)
 		flag = FA_WRITE;
 		break;
 		case O_RDWR:
-		flag = FA_READ&FA_WRITE;
+		flag = FA_READ|FA_WRITE;
 		break;
 		case O_ACCMODE:	
-		flag = FA_READ&FA_WRITE;
+		flag = FA_READ|FA_WRITE;
 	//	panic("ACCMODE\n");
 		break;
 	}
 	switch(flag2&0xf00){
 		case O_CREAT:
-		if(flag4&0xf000 == O_TRUNC)
+//		if(flag4&0xf000 == O_TRUNC)
 			flag |= FA_CREATE_ALWAYS;
 		break;
 		case O_EXCL:
@@ -95,9 +95,12 @@ int fat_read(struct fs_fd* file, void* buf, size_t count)
 {
 	FIL fp;
 	UINT br;
-	f_read(file->data, buf, count, &br);
-	printk("fat_read br:%d\n",br);
-
+	int ret = f_read(file->data, buf, count, &br);
+//	printk("fat_read br:%d\n",br);
+	if(ret == 0)
+		return br;
+	printk("fat_read error -> ret:%d , br:%d\n",ret,br);
+	return -ret;
 //	FRESULT f_read (
 //	FIL* fp, 	/* Pointer to the file object */
 //	void* buff,	/* Pointer to data buffer */
@@ -111,14 +114,19 @@ int fat_write(struct fs_fd* file, const void* buf, size_t count)
 	UINT bw;
 	int ret;
 	ret = f_write((FIL*)file->data, buf, count, &bw);
+	
+//	printk("fat_write check -> ret:%d , bw:%d\n",ret,bw);
 	if(ret == 0)
 		return bw;
 	printk("fat_write error -> ret:%d , bw:%d\n",ret,bw);
-	return ret;
+	return -ret;
 }
 int fat_lseek(struct fs_fd* file, off_t offset)
 {	
-	return f_lseek(file->data, offset);
+	printk("lseek\n");
+int res =  f_lseek((FIL*)file->data, offset);
+	printk("f_lseek:%d\n",res);
+	return res;
 }
 int fat_unlink(struct fs_fd* file, const char *pathname)
 {

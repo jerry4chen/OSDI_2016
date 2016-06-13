@@ -98,7 +98,7 @@ DRESULT disk_read (BYTE pdrv, BYTE* buff, DWORD sector, UINT count)
 	for  (i=0;i<count;i++){
 	
 		ide_read_sectors(DISK_ID, 1, cur_sector, (unsigned int)ptr+i*512);
-		cur_sector += 512;
+		cur_sector ++;
 	}
 	return RES_OK;
 }
@@ -121,12 +121,12 @@ DRESULT disk_write (BYTE pdrv, const BYTE* buff, DWORD sector, UINT count)
     BYTE *ptr = buff;
     UINT cur_sector = sector;
     
-//    printk("disk_write %d sector %d count %d\n", pdrv, sector, count);
+    printk("disk_write %d sector %d count %d\n", pdrv, sector, count);
     /* TODO */    
-	//unsigned char ide_read(unsigned char channel, unsigned char reg) {
-                 
-        	ide_write_sectors(DISK_ID, count, cur_sector, (unsigned int)ptr);
-		//	printk("disk_write_IDE_ATA\n");
+        	//ide_write_sectors(DISK_ID, count, cur_sector, (unsigned int)ptr);
+		//return RES_OK;
+        	for (i=0; i < count; i++)
+			ide_write_sectors(DISK_ID,1 , cur_sector+i, (unsigned int)ptr+i*512);
 		return RES_OK;
 }
 

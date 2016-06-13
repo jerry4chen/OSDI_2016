@@ -14,23 +14,32 @@
 *       5. Handle the error code, for example, if user call open() but no fd slot can be use, sys_open should return -STATUS_ENOSPC.
 */
 
+
+
+
 // Below is POSIX like I/O system call 
 int sys_open(const char *file, int flags, int mode)
 {
     //We dont care the mode.
 /* TODO */
 	int idx = fd_new();	
-	struct fs_fd* d;
-	d = fd_get(idx);
-	//printk("constcharfile:%s\n",file);
-	int ret = file_open(d, file, flags);
-	if(ret ==0)
-	return idx;
-	else 
-	{
-	printk("sys_open error:%d",ret);
-	return ret;
+ 	struct fs_fd* d;
+	int ret;
+	if(idx != -1){
+			d = fd_get(idx);
+			ret = file_open(d, file, flags);
+			if(ret ==0){
+			return idx;
+			}	
+			else{
+			fd_put(d);
+			return -ret;//file open error;
+			}	
 	}
+	else {
+			return idx;//return -1;
+		}
+	
 	
 	//int file_open(struct fs_fd* fd, const char *path, int flags)
 	
@@ -39,20 +48,35 @@ int sys_open(const char *file, int flags, int mode)
 int sys_close(int fd)
 {
 /* TODO */
-	file_close(fd_get(fd));
-//	fd_put(fd);
+	
+ 	struct fs_fd* d = fd_get(fd);
+	file_close(d);
+	fd_put(d);
+	fd_put(d);
 	return 0;
 
 }
 int sys_read(int fd, void *buf, size_t len)
 {
 /* TODO */
-	return file_read(fd_get(fd), buf, len);
+	int res;
+ 	struct fs_fd* d;
+	d = fd_get(fd);
+	res = file_read(d, buf, len);
+	fd_put(d);
+	fd_put(d);
+	return res;
 }
 int sys_write(int fd, const void *buf, size_t len)
 {
 /* TODO */
-	return file_write(fd_get(fd), buf, len);
+	int res;
+ 	struct fs_fd* d;
+	d = fd_get(fd);
+	res = file_write(d, buf, len);
+	fd_put(d);
+	fd_put(d);
+	return res;
 }
 
 /* Note: Check the whence parameter and calcuate the new offset value before do file_seek() */
@@ -60,15 +84,21 @@ off_t sys_lseek(int fd, off_t offset, int whence)
 {
 /* TODO */
 	off_t newoffset;
+ 	struct fs_fd* d;
+	d = fd_get(fd);
+	
 	switch(whence){
 	case SEEK_SET:
 		newoffset = offset;
 		break;
 	case SEEK_END:
-		newoffset = fd_get(fd)+offset;
+		newoffset = d+offset;
 		break;
 	}
-	return file_lseek(fd, newoffset);
+	
+	int res =  file_lseek(d, newoffset);
+	fd_put(d);
+	return res;
 }
 
 int sys_unlink(const char *pathname)

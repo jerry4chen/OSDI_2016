@@ -81,7 +81,9 @@ int file_read(struct fs_fd* fd, void *buf, size_t len)
 
 int file_write(struct fs_fd* fd, const void *buf, size_t len)
 {
-	return fat_write(fd, buf, len);
+	int res = fat_write(fd, buf, len);
+//	printk("file_wrtie:%d\n",res);
+	return res;
 }
 
 /* Note: Before call call fat_fs.ops->open() you may copy the path and flags parameters into fd object structure */
