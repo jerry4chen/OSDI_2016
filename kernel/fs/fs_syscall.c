@@ -115,10 +115,9 @@ off_t sys_lseek(int fd, off_t offset, int whence)
 		newoffset = (off_t)(d->pos);
 		break;	
 	case SEEK_END:
-		newoffset = (size_t)d->size+offset;
+		newoffset = (off_t)(d->size)+offset;
 		break;
 	}
-	
 	int res =  file_lseek(d, newoffset);
 	fd_put(d);
 	return res;

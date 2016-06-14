@@ -337,19 +337,15 @@ int filetest5(int argc, char **argv)
     uassert(fd >= STATUS_OK);
     
     ret = close(fd);
-	cprintf("ret = %d\n",ret);
     uassert(ret == STATUS_OK);
     
     ret = unlink("test5");
-	cprintf("ret = %d\n",ret);
     uassert(ret == STATUS_OK);
     
     fd = open("test5", O_RDWR, 0);
-	cprintf("fd = %d\n",fd);
     uassert(fd == -STATUS_ENOENT); //file should be removed.
     
     fd = open("hello.txt", O_RDWR | O_APPEND, 0);
-	cprintf("fd = %d\n",fd);
     uassert(fd >= STATUS_OK);
     
     ret = write(fd, buf, 10);

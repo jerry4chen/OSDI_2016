@@ -154,8 +154,10 @@ int fat_write(struct fs_fd* file, const void* buf, size_t count)
 	ret = f_write((FIL*)file->data, buf, count, &bw);
 	
 //	printk("fat_write check -> ret:%d , bw:%d\n",ret,bw);
-	if(ret == 0)
+	if(ret == 0){
+		file->size += bw;
 		return bw;
+	}
 	printk("fat_write error -> ret:%d , bw:%d\n",ret,bw);
 	return -ret;
 }
