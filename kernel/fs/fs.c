@@ -116,7 +116,10 @@ int file_unlink(const char *path)
 //	printk("file_unlink:%s\n",path);
 	return fat_unlink(NULL,path);
 }
+int file_ls(const char *path){
 
+	return fat_ls(NULL,path);
+}
 
 /**
  * @ingroup Fd

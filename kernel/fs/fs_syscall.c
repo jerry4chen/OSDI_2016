@@ -106,7 +106,7 @@ off_t sys_lseek(int fd, off_t offset, int whence)
 		return -STATUS_EINVAL;
 	
 	d = fd_get(fd);
-	
+	printk("seek :%d, size:%d, pos:%d\n",fd,d->size,d->pos);
 	switch(whence){
 	case SEEK_SET:
 		newoffset = offset;
@@ -127,6 +127,12 @@ int sys_unlink(const char *pathname)
 {
 /* TODO */
 	return file_unlink(pathname); 
+}
+int sys_ls(const char *pathname)
+{
+	printk("sys_ls:%s\n",pathname);
+	file_ls(pathname);
+	return 0;
 }
 
 

@@ -23,6 +23,9 @@ enum {
     SYS_write,
     SYS_lseek,
     SYS_unlink,
+    /* Lab7.3 ls command*/
+
+    SYS_ls,
 
 	NSYSCALLS
 };
@@ -55,4 +58,7 @@ int sys_read(int fd, void *buf, size_t len);
 int sys_write(int fd, const void *buf, size_t len);
 off_t sys_lseek(int fd, off_t offset, int whence);
 int sys_unlink(const char *pathname);
+int sys_ls(const char *pathname);
+
+
 #endif

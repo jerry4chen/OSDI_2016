@@ -49,6 +49,15 @@ int fat_open(struct fs_fd* file)
 	int flag = 0;	
 //	printk("flag:%7x, flag&0xf000:%7x\n",flag2,flag2&0xf000);
 	
+//#define O_RDONLY		0x0000000
+//#define O_WRONLY		0x0000001
+//#define O_RDWR		0x0000002
+//#define O_ACCMODE		0x0000003
+//#define O_CREAT		0x0000100
+//#define O_EXCL		0x0000200
+//#define O_TRUNC		0x0001000
+//#define O_APPEND		0x0002000
+//#define O_DIRECTORY		0x0200000
 	switch(flag2&0x0f){ //check the final 2 bit
 		case O_RDONLY:
 		flag = FA_READ;
@@ -75,18 +84,11 @@ int fat_open(struct fs_fd* file)
 		}
 		break;
 	
-	}/*
-	switch(flag4&0xf000){
-		case O_TRUNC:
-			flag|=FA_CREATE_ALWAYS;
-		break;
-		case O_APPEND:
-			isappend=1;		
-		break;
-	}*/
+	}
+
 	path = file->path;
 	ret = f_open(file->data, path, flag);
-//	if(isappend) f_lseek(file->data,f_size(file->pos));
+	if(flag2&O_APPEND) f_lseek(file->data,(off_t)file->size);
 	switch(ret){
 		case FR_NO_FILE:
 		case FR_NO_PATH:
@@ -135,8 +137,11 @@ int fat_read(struct fs_fd* file, void* buf, size_t count)
 	UINT br;
 	int ret = f_read(file->data, buf, count, &br);
 //	printk("fat_read br:%d\n",br);
-	if(ret == 0)
+	if(ret == 0){
+
+		printk("br : %d\n",br);
 		return br;
+}
 	printk("fat_read error -> ret:%d , br:%d\n",ret,br);
 	return -ret;
 //	FRESULT f_read (
@@ -156,6 +161,7 @@ int fat_write(struct fs_fd* file, const void* buf, size_t count)
 //	printk("fat_write check -> ret:%d , bw:%d\n",ret,bw);
 	if(ret == 0){
 		file->size += bw;
+		printk("write %dbytes size:%d\n",bw,file->size);
 		return bw;
 	}
 	printk("fat_write error -> ret:%d , bw:%d\n",ret,bw);
@@ -179,6 +185,43 @@ int fat_unlink(struct fs_fd* file, const char *pathname)
 		return res;
 
 	}
+}
+int fat_ls(struct fs_fd* file, const char *pathname){
+
+	FRESULT res;
+	DIR dir;
+	UINT i;
+	static FILINFO fno;
+	
+	res = f_opendir(&dir, &fno);
+	printk("fat_ls opendir res:%d\n",res);
+	if(res ==  FR_OK){
+	for(;;){
+	printk("res:%d,dir.dir:%s\n",res,dir.dir);
+		if(res != FR_OK || fno.fname[0]==0) break;
+	printk("res:%d,dir.dir:%s\n",res,dir.dir);
+		if(fno.fattrib & AM_DIR){
+			printk(&pathname[i=strlen(pathname)],"%s",fno.fname);
+			res = fat_ls(NULL,pathname);
+	printk("fat_ls:%d\n",res);
+			if(res!=FR_OK) break;
+//			pathname[i]=0;
+	
+		}else{
+			printk("%s/%s\n",pathname,fno.fname);
+		}
+	}
+	f_closedir(&dir);
+	}
+	printk("fat_ls:%s\n",pathname);
+	switch(res){
+		case FR_INVALID_OBJECT:
+		printk("File or path not exist\n");
+		break;
+		
+	}
+	return res;
+
 }
 
 struct fs_ops elmfat_ops = {

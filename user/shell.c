@@ -23,6 +23,7 @@ int filetest2(int argc, char **argv);
 int filetest3(int argc, char **argv);
 int filetest4(int argc, char **argv);
 int filetest5(int argc, char **argv);
+int filels(int argc, char **argv);
 
 struct Command commands[] = {
   { "help", "Display this list of commands", mon_help },
@@ -30,7 +31,7 @@ struct Command commands[] = {
   { "print_tick", "Display system tick", print_tick },
   { "chgcolor", "Change screen text color", chgcolor },
   { "forktest", "Test functionality of fork()", forktest },
-  
+  { "ls","List the Directory",filels},
   { "filetest", "Test create file", filetest },
   { "fs_seek_test", "Test seek file", fs_seek_test },
   { "fs_speed_test", "Test R/W speed", fs_speed_test},
@@ -40,6 +41,19 @@ struct Command commands[] = {
   { "filetest5", "unlink test", filetest5}
 };
 const int NCOMMANDS = (sizeof(commands)/sizeof(commands[0]));
+
+
+int filels(int argc, char **argv){
+
+	if(argc>1){
+//    	char fore = argv[1][0] - '0';
+		cprintf("ls: %s\n",argv[1]);
+		ls(argv[1]);
+	}
+	else cprintf("no input parameter\n");
+
+}
+
 
 int mem_stat(int argc, char **argv)
 {
