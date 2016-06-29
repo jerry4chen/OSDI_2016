@@ -69,6 +69,7 @@ int file_write(struct fs_fd* fd, const void *buf, size_t len);
 
 int file_lseek(struct fs_fd* fd, off_t offset);
 int file_unlink(const char *path);
+int file_ls(const char *path);
 
 struct fs_fd* fd_get(int fd);
 void fd_put(struct fs_fd* fd);
